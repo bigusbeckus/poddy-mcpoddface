@@ -1,0 +1,36 @@
+.animation-quick {
+  animation-duration: 700ms;
+}
+
+.animation-reverse {
+  animation-direction: reverse;
+}
+
+.animation-alterate {
+  animation-direction: alterate;
+}
+
+.animation-ease {
+  animation-timing-function: ease;
+}
+
+.animation-linear {
+  animation-timing-function: linear;
+}
+
+.animation-ease-in {
+  animation-timing-function: ease-in;
+}
+
+.animation-ease-out {
+  animation-timing-function: ease-out;
+}
+
+.animation-ease-in-out {
+  animation-timing-function: ease-in-out;
+}
+
+.animation-material {
+  animation-timing-function: ease;
+  animation-delay: 2s;
+}
