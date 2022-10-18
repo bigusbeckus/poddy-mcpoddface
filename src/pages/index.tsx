@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import {
-  itunesPodcastLink,
+  podcastSearchLink,
   PodcastResult,
   SearchReturn,
 } from "../libs/itunes-podcast";
@@ -15,7 +15,9 @@ import { Modal } from "../components/modal";
 import { Button } from "../components/button";
 import { Dialog } from "@headlessui/react";
 import { TextField } from "../components/input/text-field";
+import { PodcastGridView, PodcastListView } from "../components/podcast-view";
 import Link from "next/link";
+import { PodcastList } from "../components/podcast-list";
 
 // export async function getServerSideProps() {
 //   const queryClient = new QueryClient();
@@ -30,14 +32,26 @@ import Link from "next/link";
 
 const Home: NextPageWithRootLayout = (props) => {
   const [terms, setTerms] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
+  // const [dialogOpen, setDialogOpen] = useState(false);
 
-  const [selection, setSelection] = useState(null as PodcastResult | null);
+  // const [selection, setSelection] = useState(null as PodcastResult | null);
+
+  const searchLink = podcastSearchLink().term(terms).country("de");
 
   const { data, error, isLoading, refetch } = useQuery(
-    ["searchResults"],
-    itunesPodcastLink().term(terms).fetch
+    ["podcasts"],
+    searchLink.fetch
   );
+
+  const [view, setView] = useState("grid");
+
+  function toggleView() {
+    if (view === "grid") {
+      setView("list");
+    } else {
+      setView("grid");
+    }
+  }
 
   function handleTermsInput(event: ChangeEvent<HTMLInputElement>) {
     setTerms(event.target.value);
@@ -46,6 +60,11 @@ const Home: NextPageWithRootLayout = (props) => {
       trailing: true,
     })();
   }
+
+  // function handleItemClick(item: PodcastResult) {
+  //   setSelection(item);
+  //   setDialogOpen(true);
+  // }
 
   if (isLoading) return <h1>Loading...</h1>;
 
@@ -60,50 +79,27 @@ const Home: NextPageWithRootLayout = (props) => {
         onChange={handleTermsInput}
         className="bg-black/10 dark:bg-white/10 px-4 py-4 text-xl font-thin rounded-md"
       /> */}
-      <TextField
-        value={terms}
-        onChange={handleTermsInput}
-        placeholder="Search"
-      />
       {/* <Link href="/">To second page</Link> */}
-      <div className="py-2">
-        Search Link: {itunesPodcastLink().term(terms).get()}
+      <div className="py-2">Search Link: {searchLink.getLink()}</div>
+      <div className="flex justify-between">
+        <TextField
+          value={terms}
+          onChange={handleTermsInput}
+          placeholder="Search"
+        />
+        <Button onClick={toggleView}>
+          {view === "grid" ? "List View" : "Grid View"}
+        </Button>
       </div>
-      <hr className="mb-4 border-white/10" />
+      <hr className="my-4 border-white/10" />
 
-      <Modal state={[dialogOpen, setDialogOpen]}>
-        <Dialog.Panel className="w-full max-w-md p-8 rounded-md bg-white dark:bg-gray-700">
-          {selection ? (
-            <Dialog.Title as="h3" className="">
-              {selection.collectionName}
-            </Dialog.Title>
-          ) : (
-            <div>something</div>
-          )}
-        </Dialog.Panel>
-      </Modal>
-
-      <div className="grid grid-cols-8 gap-1">
-        {/* {JSON.stringify(data.resultCount)} */}
-        {(data as SearchReturn).resultCount > 0
-          ? (data as SearchReturn).results.map((result) => (
-              <div
-                key={result.trackId}
-                onClick={() => {
-                  setSelection(result);
-                  setDialogOpen(true);
-                }}
-                className="hover:bg-background_light/20 hover:dark:bg-background_dark/20 p-1  cursor-pointer rounded-md transition duration-300">
-                <img src={result.artworkUrl600} className="w-full rounded-md" />
-                <div className="mt-2 leading-tight text-center text-ellipsis">
-                  {result.collectionName}
-                </div>
-              </div>
-            ))
-          : terms
-          ? "No results found"
-          : "Start typing to get results"}
-      </div>
+      {data && (data as SearchReturn).resultCount > 0 ? (
+        <PodcastList podcasts={data.results} view={view} />
+      ) : terms ? (
+        "No results found"
+      ) : (
+        "Start typing to get results"
+      )}
     </div>
   );
 };

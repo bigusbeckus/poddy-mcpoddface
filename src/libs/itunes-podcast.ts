@@ -1,6 +1,9 @@
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 
-export const BASE_LINK = "https://itunes.apple.com/search?media=podcast";
+export const ITUNES_PODCAST_SEARCH_LINK =
+  "https://itunes.apple.com/search?media=podcast";
+export const ITUNES_PODCAST_LOOKUP_LINK =
+  "https://itunes.apple.com/lookup?&entity=podcast";
 
 export type PodcastResult = {
   wrapperType: string;
@@ -44,7 +47,7 @@ export type SearchReturn = {
   results: PodcastResult[];
 };
 
-export function itunesPodcastLink() {
+export function podcastSearchLink() {
   let _country: string | undefined;
   let _entity: string | undefined;
   let _attribute: string | undefined;
@@ -55,7 +58,7 @@ export function itunesPodcastLink() {
   let _term: string | undefined;
 
   function country(country: string) {
-    _country = country;
+    _country = country.toUpperCase();
     return obj;
   }
   function entity(entity: string) {
@@ -86,11 +89,11 @@ export function itunesPodcastLink() {
     _term = term;
     return obj;
   }
-  function get() {
-    let link = BASE_LINK;
+  function getLink() {
+    let link = ITUNES_PODCAST_SEARCH_LINK;
 
     if (_country) {
-      link += `&country=${_country.toUpperCase()}`;
+      link += `&country=${_country}`;
     }
     if (_entity) {
       link += `&entity=${_entity}`;
@@ -118,7 +121,7 @@ export function itunesPodcastLink() {
   }
 
   async function fetch(): Promise<SearchReturn> {
-    return (await axios.get(get())).data;
+    return (await axios.get(getLink())).data;
   }
 
   let obj = {
@@ -138,8 +141,57 @@ export function itunesPodcastLink() {
     version,
     explicit,
     term,
-    get,
+    getLink,
     fetch,
   };
   return obj;
+}
+
+// export async function podcastLookupLink() {
+//   let
+// }
+
+export async function getFeed(feedUrl: string) {
+  let headersList = {
+    // "User-Agent": "Thunder Client (https://www.thunderclient.com)",
+    // "Access-Control-Allow-Origin": "http://co.rs",
+    // "Access-Control-Allow-Methods": "GET, PUT, POST, DELETE, HEAD, OPTIONS",
+  };
+  let requestOptions: AxiosRequestConfig = {
+    url: feedUrl,
+    method: "GET",
+    headers: headersList,
+  };
+
+  const response = await axios.request(requestOptions);
+  // const response = await axios.get(feedUrl);
+  console.log(response.data);
+  return response.data;
+  // return (await axios.get(feedUrl)).data;
+}
+
+export function getLookupLink({
+  prop,
+  value,
+}: {
+  prop?: string;
+  value: string;
+}) {
+  // TODO: Maybe use zod for validation here?
+  const lookupProp = prop ?? "id";
+  return `${ITUNES_PODCAST_LOOKUP_LINK}${lookupProp}=${value}`;
+}
+
+export async function lookupPodcast({
+  lookupId,
+  lookupType,
+}: {
+  lookupId: string;
+  lookupType?: string;
+}): Promise<SearchReturn> {
+  return (
+    await axios.get(
+      `${ITUNES_PODCAST_LOOKUP_LINK}&${lookupType ?? "id"}=${lookupId}`
+    )
+  ).data;
 }
