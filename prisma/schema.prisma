@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PodcastCacheEntry {
+  id                           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt                    DateTime    @default(now())
+  updatedAt                    DateTime    @updatedAt
+  // iTunes
+  itunesWrapperType            String
+  itunesKind                   String
+  itunesArtistId               Int         @unique
+  itunesCollectionId           Int         @unique
+  itunesTrackId                Int         @unique
+  itunesArtistName             String
+  itunesCollectionName         String
+  itunesTrackName              String
+  itunesFeedUrl                String
+  itunesArtworkUrl30           String
+  itunesArtworkUrl60           String
+  itunesArtworkUrl100          String
+  itunesArtworkUrl600          String
+  itunesReleaseDate            DateTime
+  itunesCollectionExplicitness String
+  itunesTrackExplicitness      String
+  itunesTrackCount             Int
+  itunesCountry                String
+  itunesPrimaryGenreName       String
+  itunesContentAdvisoryRating  String
+  itunesGenreIds               String[]
+  itunesGenres                 String[]
+  // Feed - Required
+  feedTitle                    String
+  feedDescription              String
+  feedItunesImage              String
+  feedLanguage                 String
+  feedItunesCategory           String
+  feedItunesExplicit           Boolean
+  // Feed - Recommended
+  feedItunesAuthor             String?
+  feedLink                     String?
+  // Feed - Situational
+  feedItunesType               iTunesType?
+  feedCopyright                String?
+  feedNewUrl                   String?
+  feedComplete                 Boolean     @default(false)
+  feedOwnerName                String?
+  feedOwnerEmail               String?
+}
+
+enum iTunesType {
+  EPISODIC
+  SERIAL
+}
+
+model Episode {
+  // Episode - Required
+  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title             String
+  url               String
+  length            Int // File size in bytes
+  type              String
+  // Episode - Recommended
+  guid              String?     @db.Uuid
+  pubDate           DateTime?
+  description       String?
+  itunesDuration    String?
+  link              String?
+  itunesImage       String? // Episode artwork
+  itunesExplicit    Boolean     @default(true)
+  // Episode - Situational
+  itunesEpisode     Int? // Episode number for custom ordering
+  itunesSeason      Int? // Season number for custom ordering
+  itunesEpisodeType EpisodeType @default(FULL)
+}
+
+enum EpisodeType {
+  // The rules for using trailer and bonus tags depend on whether the
+  // itunesSeason and itunesEpisode tags have values:
+
+  // Trailer:
+  //  - No season or episode number: a show trailer
+  //  - A season number and no episode number: a season trailer.
+  //    (Note: an episode trailer should have a different <guid> than the actual episode)
+  //  - Episode number and optionally a season number: an episode trailer/teaser,
+  //    later replaced with the actual episode
+
+  // Bonus:
+  //  - No season or episode number: a show bonus
+  //  - A season number: a season bonus
+  //  - Episode number and optionally a season number: a bonus episode related to a specific episode
+
+  FULL
+  TRAILER
+  BONUS
+}
