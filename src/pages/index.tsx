@@ -1,34 +1,12 @@
-import type { NextPage } from "next";
-import Head from "next/head";
-import Image from "next/image";
-import {
-  podcastSearchLink,
-  PodcastResult,
-  SearchReturn,
-} from "../libs/itunes-podcast";
+import { podcastSearchLink, SearchReturn } from "../libs/itunes-podcast";
 import { NextPageWithRootLayout } from "./_app";
-import { dehydrate, QueryClient, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { HomeLayout } from "../layouts/home";
 import { ChangeEvent, ReactElement, Suspense, useState } from "react";
-import { debounce, result } from "lodash-es";
-import { Modal } from "../components/modal";
+import { debounce } from "lodash-es";
 import { Button } from "../components/button";
-import { Dialog } from "@headlessui/react";
 import { TextField } from "../components/input/text-field";
-import { PodcastGridView, PodcastListView } from "../components/podcast-view";
-import Link from "next/link";
 import { PodcastList } from "../components/podcast-list";
-
-// export async function getServerSideProps() {
-//   const queryClient = new QueryClient();
-
-//   await queryClient.prefetchQuery(
-//     ["searchResults"],
-//     itunesPodcastLink().term("some").fetch
-//   );
-
-//   return { props: { dehydratedState: dehydrate(queryClient) } };
-// }
 
 const Home: NextPageWithRootLayout = (props) => {
   const [terms, setTerms] = useState("");
