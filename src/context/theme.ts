@@ -8,7 +8,12 @@ type ThemeContextType = [
 const THEME_STORAGE_KEY = "theme";
 const LIGHT_THEME_ENTRY = "light";
 
-export const ThemeContext = createContext<ThemeContextType>();
+export const ThemeContext = createContext<ThemeContextType>([
+  true,
+  () => {
+    return;
+  },
+]);
 
 export function useThemeContextState(initial: boolean) {
   const [darkMode, setDarkMode] = useState(initial);
