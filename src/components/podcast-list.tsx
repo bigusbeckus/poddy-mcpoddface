@@ -31,7 +31,7 @@ export const PodcastList: React.FC<PodcastListProps> = ({ podcasts, view }) => {
             </Dialog.Title>
             <div className="border-solid border-2 border-white/20 p-2 rounded-md">
               {selection.genres.map((genre) => (
-                <div>{genre}</div>
+                <div key={genre}>{genre}</div>
               ))}
             </div>
             <Link
@@ -56,6 +56,7 @@ export const PodcastList: React.FC<PodcastListProps> = ({ podcasts, view }) => {
         <div className="">
           {podcasts.map((result) => (
             <Link
+              key={result.collectionId}
               href={{
                 pathname: `/podcast/${result.collectionId}`,
               }}>
@@ -105,6 +106,7 @@ export const PodcastList: React.FC<PodcastListProps> = ({ podcasts, view }) => {
       <div className="grid grid-cols-8 gap-1">
         {podcasts.map((result) => (
           <Link
+            key={result.collectionId}
             href={{
               pathname: `/podcast/${result.collectionId}`,
             }}>

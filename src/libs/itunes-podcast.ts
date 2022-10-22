@@ -54,7 +54,7 @@ export function podcastSearchLink() {
   let _limit: number | undefined;
   let _lang: string | undefined;
   let _version: number | undefined;
-  let _explicit: boolean = false;
+  let _explicit = false;
   let _term: string | undefined;
 
   function country(country: string) {
@@ -124,7 +124,7 @@ export function podcastSearchLink() {
     return (await axios.get(getLink())).data;
   }
 
-  let obj = {
+  const obj = {
     _country,
     _entity,
     _attribute,
@@ -152,12 +152,12 @@ export function podcastSearchLink() {
 // }
 
 export async function getFeed(feedUrl: string) {
-  let headersList = {
+  const headersList = {
     // "User-Agent": "Thunder Client (https://www.thunderclient.com)",
     // "Access-Control-Allow-Origin": "http://co.rs",
     // "Access-Control-Allow-Methods": "GET, PUT, POST, DELETE, HEAD, OPTIONS",
   };
-  let requestOptions: AxiosRequestConfig = {
+  const requestOptions: AxiosRequestConfig = {
     url: feedUrl,
     method: "GET",
     headers: headersList,
