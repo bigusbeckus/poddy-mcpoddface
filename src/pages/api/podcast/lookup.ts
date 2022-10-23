@@ -44,6 +44,7 @@ export default async function handler(
           take: EPISODE_FETCH_LIMIT,
           orderBy: EPISODE_DEFAULT_ORDER_BY,
         },
+        feedItunesCategories: true,
       },
     });
     if (dbResponse) {
@@ -102,7 +103,6 @@ export default async function handler(
       feedDescription: channel.description,
       feedItunesImage: channel["itunes:image"]["@_href"],
       feedLanguage: channel["language"],
-      feedItunesCategory: channel["itunes:category"]["@_text"],
       feedItunesExplicit: channel["itunes:explicit"] === "yes",
       feedItunesAuthor: channel["itunes:author"],
       feedItunesType:
@@ -164,48 +164,57 @@ export default async function handler(
       episodeData.push(episode);
     }
 
-    // const episodeData: Prisma.EpisodeCreateInput = channel.item.map(
-    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //   (item: any) => {
-    //     const durationIsNum = /^\d+$/.test(item["itunes:duration"]);
-
-    //     const episode: Omit<Prisma.EpisodeCreateInput, "Podcast"> = {
-    //       title: item["title"],
-    //       url: item["enclosure"]["@_url"],
-    //       length: parseInt(item["enclosure"]["@_length"]),
-    //       type: item["enclosure"]["@_type"],
-    //       guid:
-    //         item["guid"] && item["guid"]["#text"]
-    //           ? item["guid"]["#text"].toString()
-    //           : undefined,
-    //       pubDate: item["pubDate"]
-    //         ? parse(
-    //             (() => {
-    //               const fragments = item["pubDate"].split(" ");
-    //               return `${fragments
-    //                 .slice(0, fragments.length - 1)
-    //                 .join(" ")} +0000`;
-    //             })(),
-    //             "E, dd MMM yyyy HH:mm:ss xx",
-    //             new Date()
-    //           )
-    //         : undefined,
-    //       description: item["description"],
-    //       itunesDuration: durationIsNum
-    //         ? parseInt(item["itunes:duration"])
-    //         : parseDurationSeconds(item["itunes:duration"]),
-    //       link: item["link"],
-    //       itunesImage: item["itunes:image"]
-    //         ? item["itunes:image"]["@_href"]
-    //         : undefined,
-    //       itunesExplicit: item["itunes:explicit"] === "yes",
-    //       itunesEpisode: item["itunes:episode"],
-    //       itunesSeason: item["itunes:season"],
-    //       itunesEpisodeType: item["itunes:episodetype"],
-    //     };
-    //     return episode;
-    //   }
-    // );
+    const feedCategories =
+      channel["itunes:category"].length > 1
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          channel["itunes:category"].map((category: any) =>
+            category["itunes:category"]
+              ? {
+                  where: {
+                    text: category["itunes:category"]["@_text"],
+                  },
+                  create: {
+                    text: category["itunes:category"]["@_text"],
+                  },
+                }
+              : {
+                  where: {
+                    text: category["@_text"],
+                  },
+                  create: {
+                    text: category["@_text"],
+                  },
+                }
+          )
+        : channel["itunes:category"]["itunes:category"]
+        ? [
+            {
+              where: {
+                text: channel["itunes:category"]["@_text"],
+              },
+              create: {
+                text: channel["itunes:category"]["@_text"],
+              },
+            },
+            {
+              where: {
+                text: channel["itunes:category"]["itunes:category"]["@_text"],
+              },
+              create: {
+                text: channel["itunes:category"]["itunes:category"]["@_text"],
+              },
+            },
+          ]
+        : [
+            {
+              where: {
+                text: channel["itunes:category"]["@_text"],
+              },
+              create: {
+                text: channel["itunes:category"]["@_text"],
+              },
+            },
+          ];
 
     const podcast = await prisma.podcast.upsert({
       create: {
@@ -216,6 +225,9 @@ export default async function handler(
             skipDuplicates: true,
           },
         },
+        feedItunesCategories: {
+          connectOrCreate: feedCategories,
+        },
       },
       update: {
         ...podcastData,
@@ -224,6 +236,9 @@ export default async function handler(
             data: episodeData,
             // skipDuplicates: true,
           },
+        },
+        feedItunesCategories: {
+          connectOrCreate: feedCategories,
         },
       },
       where: {
@@ -234,6 +249,7 @@ export default async function handler(
           take: EPISODE_FETCH_LIMIT,
           orderBy: EPISODE_DEFAULT_ORDER_BY,
         },
+        feedItunesCategories: true,
       },
     });
     if (podcast) {

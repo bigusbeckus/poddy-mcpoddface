@@ -53,7 +53,7 @@ export const PodcastDetails: React.FC<PodcastDetailsProps> = ({ podcast }) => {
     return <div>Loading...</div>;
   }
 
-  if (error) {
+  if (!data || error) {
     return (
       <div>
         Error:{" "}
@@ -75,6 +75,15 @@ export const PodcastDetails: React.FC<PodcastDetailsProps> = ({ podcast }) => {
             alt={`${data.feedTitle} thumbnail`}
             className=""
           />
+          <div className="py-2 flex flex-wrap justify-center gap-2">
+            {data.feedItunesCategories?.map((category) => (
+              <span
+                key={category.id}
+                className="py-1 px-2 text-sm font-bold rounded-xl dark:bg-white/20 bg-black/20">
+                {category.text}
+              </span>
+            ))}
+          </div>
         </div>
         {/* Episodes */}
         <div className="grow w-96 pl-16 py-8 grid grid-cols-1 gap-3">
@@ -88,6 +97,7 @@ export const PodcastDetails: React.FC<PodcastDetailsProps> = ({ podcast }) => {
                   <FetchedImage
                     src={episode.itunesImage ?? data.itunesArtworkUrl600}
                     alt={`${episode.title} thumbnail`}
+                    className="w-full"
                   />
                 </div>
                 <div className="flex-grow pl-4 grid grid-rows-4">

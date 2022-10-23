@@ -11,15 +11,15 @@ datasource db {
 }
 
 model Podcast {
-  id                           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  createdAt                    DateTime    @default(now())
-  updatedAt                    DateTime    @updatedAt
+  id                           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt                    DateTime         @default(now())
+  updatedAt                    DateTime         @updatedAt
   // iTunes
   itunesWrapperType            String
   itunesKind                   String
-  itunesArtistId               Int?        @unique
-  itunesCollectionId           Int         @unique
-  itunesTrackId                Int         @unique
+  itunesArtistId               Int?             @unique
+  itunesCollectionId           Int              @unique
+  itunesTrackId                Int              @unique
   itunesArtistName             String
   itunesCollectionName         String
   itunesTrackName              String
@@ -42,7 +42,7 @@ model Podcast {
   feedDescription              String
   feedItunesImage              String
   feedLanguage                 String
-  feedItunesCategory           String
+  feedItunesCategories         iTunesCategory[]
   feedItunesExplicit           Boolean
   // Feed - Recommended
   feedItunesAuthor             String?
@@ -51,10 +51,16 @@ model Podcast {
   feedItunesType               iTunesType?
   feedCopyright                String?
   feedNewUrl                   String?
-  feedComplete                 Boolean     @default(false)
+  feedComplete                 Boolean          @default(false)
   feedOwnerName                String?
   feedOwnerEmail               String?
   episodes                     Episode[]
+}
+
+model iTunesCategory {
+  id       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  text     String    @unique
+  podcasts Podcast[]
 }
 
 enum iTunesType {

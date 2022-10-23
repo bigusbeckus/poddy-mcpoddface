@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import axios from "axios";
 
 export const ITUNES_PODCAST_SEARCH_LINK =
@@ -151,7 +152,11 @@ export function podcastSearchLink() {
 //   let
 // }
 
-export async function getFeed(lookupId: number) {
+export async function getFeed(lookupId: number): Promise<
+  Prisma.PodcastGetPayload<{
+    include: { episodes: true; feedItunesCategories: true };
+  }>
+> {
   return (
     await axios.post("/api/podcast/lookup", {
       id: lookupId,
