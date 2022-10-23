@@ -1,27 +1,29 @@
-import { FC, SyntheticEvent, useState } from "react";
+/* eslint-disable @next/next/no-img-element */
+import { FC, useState } from "react";
 import { ProgressCircular } from "./progress";
 
 type ImageProps = {
   src: string;
   alt: string;
   className?: string;
+  fill?: boolean;
 };
 
-export const FetchedImage: FC<ImageProps> = ({ src, alt, className }) => {
+export const FetchedImage: FC<ImageProps> = ({ src, alt, className, fill }) => {
   const [loading, setLoading] = useState(true);
 
-  function handleImgLoad(event: SyntheticEvent) {
+  function handleImgLoad() {
     setLoading(false);
   }
 
   return (
-    <div className="relative">
+    <div className={`relative ${fill ? "w-full h-full" : ""}`}>
       <img
         src={src}
         alt={alt}
-        className={`object-cover transition duration-500 ${className} ${
-          loading ? "opacity-0" : ""
-        }`}
+        className={`object-cover w-full h-full transition duration-500 ${
+          fill ? "w-full" : "h-full"
+        } ${className} ${loading ? "opacity-0" : ""}`}
         onLoad={handleImgLoad}
       />
       <div

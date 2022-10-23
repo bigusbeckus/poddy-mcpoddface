@@ -98,13 +98,14 @@ export const PodcastDetails: React.FC<PodcastDetailsProps> = ({ podcast }) => {
                     src={episode.itunesImage ?? data.itunesArtworkUrl600}
                     alt={`${episode.title} thumbnail`}
                     className="w-full"
+                    fill
                   />
                 </div>
                 <div className="flex-grow pl-4 grid grid-rows-4">
                   <div className="text-xl font-bold pb-2 row-span-1">
                     {episode.title}
                   </div>
-                  <div className="text-sm row-span-2 dark:text-white/80 text-ellipsis">
+                  <div className="text-sm row-span-2 dark:text-white/80">
                     <PodcastDescription
                       description={episode.description}
                       className="line-clamp-2"
