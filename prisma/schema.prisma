@@ -34,7 +34,7 @@ model Podcast {
   itunesTrackCount             Int
   itunesCountry                String
   itunesPrimaryGenreName       String
-  itunesContentAdvisoryRating  String
+  itunesContentAdvisoryRating  String?
   itunesGenreIds               String[]
   itunesGenres                 String[]
   // Feed - Required
