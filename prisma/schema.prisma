@@ -10,14 +10,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model PodcastCacheEntry {
+model Podcast {
   id                           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt                    DateTime    @default(now())
   updatedAt                    DateTime    @updatedAt
   // iTunes
   itunesWrapperType            String
   itunesKind                   String
-  itunesArtistId               Int         @unique
+  itunesArtistId               Int?        @unique
   itunesCollectionId           Int         @unique
   itunesTrackId                Int         @unique
   itunesArtistName             String
@@ -54,6 +54,7 @@ model PodcastCacheEntry {
   feedComplete                 Boolean     @default(false)
   feedOwnerName                String?
   feedOwnerEmail               String?
+  episodes                     Episode[]
 }
 
 enum iTunesType {
@@ -69,7 +70,7 @@ model Episode {
   length            Int // File size in bytes
   type              String
   // Episode - Recommended
-  guid              String?     @db.Uuid
+  guid              String?     @unique
   pubDate           DateTime?
   description       String?
   itunesDuration    String?
@@ -80,6 +81,8 @@ model Episode {
   itunesEpisode     Int? // Episode number for custom ordering
   itunesSeason      Int? // Season number for custom ordering
   itunesEpisodeType EpisodeType @default(FULL)
+  Podcast           Podcast     @relation(fields: [podcastId], references: [id])
+  podcastId         String      @db.Uuid
 }
 
 enum EpisodeType {

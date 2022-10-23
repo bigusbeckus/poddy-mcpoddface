@@ -8,7 +8,7 @@ CREATE TYPE "iTunesType" AS ENUM ('EPISODIC', 'SERIAL');
 CREATE TYPE "EpisodeType" AS ENUM ('FULL', 'TRAILER', 'BONUS');
 
 -- CreateTable
-CREATE TABLE "PodcastCacheEntry" (
+CREATE TABLE "Podcast" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE "PodcastCacheEntry" (
     "feedOwnerName" TEXT,
     "feedOwnerEmail" TEXT,
 
-    CONSTRAINT "PodcastCacheEntry_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Podcast_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -74,10 +74,10 @@ CREATE TABLE "Episode" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "PodcastCacheEntry_itunesArtistId_key" ON "PodcastCacheEntry"("itunesArtistId");
+CREATE UNIQUE INDEX "Podcast_itunesArtistId_key" ON "Podcast"("itunesArtistId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "PodcastCacheEntry_itunesCollectionId_key" ON "PodcastCacheEntry"("itunesCollectionId");
+CREATE UNIQUE INDEX "Podcast_itunesCollectionId_key" ON "Podcast"("itunesCollectionId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "PodcastCacheEntry_itunesTrackId_key" ON "PodcastCacheEntry"("itunesTrackId");
+CREATE UNIQUE INDEX "Podcast_itunesTrackId_key" ON "Podcast"("itunesTrackId");
