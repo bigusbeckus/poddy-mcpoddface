@@ -15,8 +15,10 @@ export const PodcastDescription: React.FC<PodcastDescriptionProps> = ({
   useEffect(() => {
     const element = document.createElement("span");
     element.innerHTML = content;
-    const toRemove = element.querySelectorAll("hr");
-    toRemove.forEach((el) => element.removeChild(el));
+    try {
+      const toRemove = element.querySelectorAll("hr, img");
+      toRemove.forEach((el) => element.removeChild(el));
+    } catch {}
     const children = element.querySelectorAll("*");
     children.forEach((el) => el.removeAttribute("style"));
     descriptionNode.current?.replaceChildren(element);
