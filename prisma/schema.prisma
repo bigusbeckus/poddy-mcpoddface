@@ -17,7 +17,7 @@ model Podcast {
   // iTunes
   itunesWrapperType            String
   itunesKind                   String
-  itunesArtistId               Int?             @unique
+  itunesArtistId               Int?
   itunesCollectionId           Int              @unique
   itunesTrackId                Int              @unique
   itunesArtistName             String
