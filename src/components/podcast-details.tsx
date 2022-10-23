@@ -1,4 +1,4 @@
-import { Episode } from "@prisma/client";
+import { Episode, iTunesCategory } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 // import { GetServerSideProps } from "next";
 import { getFeed, PodcastResult } from "../libs/itunes-podcast";
@@ -76,7 +76,7 @@ export const PodcastDetails: React.FC<PodcastDetailsProps> = ({ podcast }) => {
             className=""
           />
           <div className="py-2 flex flex-wrap justify-center gap-2">
-            {data.feedItunesCategories?.map((category) => (
+            {data.feedItunesCategories?.map((category: iTunesCategory) => (
               <span
                 key={category.id}
                 className="py-1 px-2 text-sm font-bold rounded-xl dark:bg-white/20 bg-black/20">
