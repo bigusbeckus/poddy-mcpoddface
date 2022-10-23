@@ -6,6 +6,20 @@ import { XMLParser } from "fast-xml-parser";
 import { iTunesType, Prisma } from "@prisma/client";
 import { parse } from "date-fns";
 import { EPISODE_FETCH_LIMIT } from "../../../server/constants/limits";
+import { EPISODE_DEFAULT_ORDER_BY } from "../../../server/constants/order";
+import { parseDurationSeconds } from "../../../libs/util/converters";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function itemValid(item: any) {
+  return (
+    item &&
+    item["title"] &&
+    item["enclosure"] &&
+    item["enclosure"]["@_url"] &&
+    item["enclosure"]["@_length"] &&
+    item["enclosure"]["@_type"]
+  );
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -28,13 +42,12 @@ export default async function handler(
       include: {
         episodes: {
           take: EPISODE_FETCH_LIMIT,
+          orderBy: EPISODE_DEFAULT_ORDER_BY,
         },
       },
     });
     if (dbResponse) {
-      return res.status(200).json({
-        result: dbResponse,
-      });
+      return res.status(200).send(dbResponse);
     }
     // Lookup podcast (db entry not found)
     const lookupResponse = (
@@ -105,41 +118,94 @@ export default async function handler(
       feedOwnerEmail: channel["itunes:owner"]["itunes:email"],
     };
 
-    const episodeData: Prisma.EpisodeCreateInput = channel.item.map(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (item: any) => {
-        const episode: Omit<Prisma.EpisodeCreateInput, "Podcast"> = {
-          title: item["title"],
-          url: item["enclosure"]["@_url"],
-          length: parseInt(item["enclosure"]["@_length"]),
-          type: item["enclosure"]["@_type"],
-          guid: item["guid"] ? item["guid"]["#text"] : undefined,
-          pubDate: item["pubDate"]
-            ? parse(
-                (() => {
-                  const fragments = item["pubDate"].split(" ");
-                  return `${fragments
-                    .slice(0, fragments.length - 1)
-                    .join(" ")} +0000`;
-                })(),
-                "E, dd MMM yyyy HH:mm:ss xx",
-                new Date()
-              )
-            : undefined,
-          description: item["description"],
-          itunesDuration: item["itunes:duration"],
-          link: item["link"],
-          itunesImage: item["itunes:image"]
-            ? item["itunes:image"]["@_href"]
-            : undefined,
-          itunesExplicit: item["itunes:explicit"] === "yes",
-          itunesEpisode: item["itunes:episode"],
-          itunesSeason: item["itunes:season"],
-          itunesEpisodeType: item["itunes:episodetype"],
-        };
-        return episode;
+    const episodeData: Omit<Prisma.EpisodeCreateInput, "Podcast">[] = [];
+    for (const item of channel.item) {
+      const durationIsNum = /^\d+$/.test(item["itunes:duration"]);
+
+      if (!itemValid(item)) {
+        continue;
       }
-    );
+
+      const episode: Omit<Prisma.EpisodeCreateInput, "Podcast"> = {
+        title: item["title"],
+        url: item["enclosure"]["@_url"],
+        length: parseInt(item["enclosure"]["@_length"]),
+        type: item["enclosure"]["@_type"],
+        guid:
+          item["guid"] && item["guid"]["#text"]
+            ? item["guid"]["#text"].toString()
+            : undefined,
+        pubDate: item["pubDate"]
+          ? parse(
+              (() => {
+                const fragments = item["pubDate"].split(" ");
+                return `${fragments
+                  .slice(0, fragments.length - 1)
+                  .join(" ")} +0000`;
+              })(),
+              "E, dd MMM yyyy HH:mm:ss xx",
+              new Date()
+            )
+          : undefined,
+        description: item["description"],
+        itunesDuration: durationIsNum
+          ? parseInt(item["itunes:duration"])
+          : parseDurationSeconds(item["itunes:duration"]),
+        link: item["link"],
+        itunesImage: item["itunes:image"]
+          ? item["itunes:image"]["@_href"]
+          : undefined,
+        itunesExplicit: item["itunes:explicit"] === "yes",
+        itunesEpisode: item["itunes:episode"],
+        itunesSeason: item["itunes:season"],
+        itunesEpisodeType: item["itunes:episodetype"],
+      };
+
+      episodeData.push(episode);
+    }
+
+    // const episodeData: Prisma.EpisodeCreateInput = channel.item.map(
+    //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //   (item: any) => {
+    //     const durationIsNum = /^\d+$/.test(item["itunes:duration"]);
+
+    //     const episode: Omit<Prisma.EpisodeCreateInput, "Podcast"> = {
+    //       title: item["title"],
+    //       url: item["enclosure"]["@_url"],
+    //       length: parseInt(item["enclosure"]["@_length"]),
+    //       type: item["enclosure"]["@_type"],
+    //       guid:
+    //         item["guid"] && item["guid"]["#text"]
+    //           ? item["guid"]["#text"].toString()
+    //           : undefined,
+    //       pubDate: item["pubDate"]
+    //         ? parse(
+    //             (() => {
+    //               const fragments = item["pubDate"].split(" ");
+    //               return `${fragments
+    //                 .slice(0, fragments.length - 1)
+    //                 .join(" ")} +0000`;
+    //             })(),
+    //             "E, dd MMM yyyy HH:mm:ss xx",
+    //             new Date()
+    //           )
+    //         : undefined,
+    //       description: item["description"],
+    //       itunesDuration: durationIsNum
+    //         ? parseInt(item["itunes:duration"])
+    //         : parseDurationSeconds(item["itunes:duration"]),
+    //       link: item["link"],
+    //       itunesImage: item["itunes:image"]
+    //         ? item["itunes:image"]["@_href"]
+    //         : undefined,
+    //       itunesExplicit: item["itunes:explicit"] === "yes",
+    //       itunesEpisode: item["itunes:episode"],
+    //       itunesSeason: item["itunes:season"],
+    //       itunesEpisodeType: item["itunes:episodetype"],
+    //     };
+    //     return episode;
+    //   }
+    // );
 
     const podcast = await prisma.podcast.upsert({
       create: {
@@ -166,6 +232,7 @@ export default async function handler(
       include: {
         episodes: {
           take: EPISODE_FETCH_LIMIT,
+          orderBy: EPISODE_DEFAULT_ORDER_BY,
         },
       },
     });

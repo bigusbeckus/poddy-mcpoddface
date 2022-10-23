@@ -73,7 +73,7 @@ model Episode {
   guid              String?     @unique
   pubDate           DateTime?
   description       String?
-  itunesDuration    String?
+  itunesDuration    Int?
   link              String?
   itunesImage       String? // Episode artwork
   itunesExplicit    Boolean     @default(true)

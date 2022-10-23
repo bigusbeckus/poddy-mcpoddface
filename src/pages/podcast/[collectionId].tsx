@@ -128,8 +128,8 @@ const SelectedPodcastPage: NextPageWithRootLayout = ({
 
   return (
     <div className="p-8">
-      <div>ID: {collectionId}</div>
-      <Link href={data.results[0].feedUrl}>{data.results[0].feedUrl}</Link>
+      {/* <div>ID: {collectionId}</div> */}
+      {/* <Link href={data.results[0].feedUrl}>{data.results[0].feedUrl}</Link> */}
       <PodcastDetails podcast={data.results[0]} />
     </div>
   );

@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from "axios";
+import axios from "axios";
 
 export const ITUNES_PODCAST_SEARCH_LINK =
   "https://itunes.apple.com/search?media=podcast";
@@ -151,23 +151,12 @@ export function podcastSearchLink() {
 //   let
 // }
 
-export async function getFeed(feedUrl: string) {
-  const headersList = {
-    // "User-Agent": "Thunder Client (https://www.thunderclient.com)",
-    // "Access-Control-Allow-Origin": "http://co.rs",
-    // "Access-Control-Allow-Methods": "GET, PUT, POST, DELETE, HEAD, OPTIONS",
-  };
-  const requestOptions: AxiosRequestConfig = {
-    url: feedUrl,
-    method: "GET",
-    headers: headersList,
-  };
-
-  const response = await axios.request(requestOptions);
-  // const response = await axios.get(feedUrl);
-  console.log(response.data);
-  return response.data;
-  // return (await axios.get(feedUrl)).data;
+export async function getFeed(lookupId: number) {
+  return (
+    await axios.post("/api/podcast/lookup", {
+      id: lookupId,
+    })
+  ).data;
 }
 
 export function getLookupLink({
