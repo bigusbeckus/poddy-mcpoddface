@@ -27,7 +27,7 @@ export const RootLayout: React.FC<RootLayoutProps> = ({
       </Head>
       <ThemeContext.Provider value={[darkMode, setDarkMode]}>
         {/* <div className={"h-full" + (darkMode ? " dark" : "")}> */}
-        <div className="bg-primary_light-300 dark:bg-primary_dark-900 dark:text-white h-full overflow-y-scroll">
+        <div className="h-full overflow-y-scroll">
           {children}
           {/* </div> */}
         </div>
