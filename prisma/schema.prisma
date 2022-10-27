@@ -111,3 +111,10 @@ enum EpisodeType {
   TRAILER
   BONUS
 }
+
+model TopPodcasts {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt     DateTime @default(now())
+  country       String   @unique
+  collectionIds Int[]
+}

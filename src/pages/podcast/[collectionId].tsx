@@ -5,7 +5,7 @@ import { HomeLayout } from "../../layouts/home";
 import {
   getFeed,
   lookupPodcast,
-  PodcastResult,
+  PodcastSearchResult,
   SearchReturn,
 } from "../../libs/itunes-podcast";
 import { NextPageWithRootLayout } from "../_app";

@@ -1,12 +1,12 @@
 import { Episode, iTunesCategory } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 // import { GetServerSideProps } from "next";
-import { getFeed, PodcastResult } from "../libs/itunes-podcast";
+import { getFeed, PodcastSearchResult } from "../libs/itunes-podcast";
 import { FetchedImage } from "./image";
 import { PodcastDescription } from "./podcast-description";
 
 type PodcastDetailsProps = {
-  podcast: PodcastResult;
+  podcast: PodcastSearchResult;
 };
 
 // export const getServerSideProps: GetServerSideProps = async ({params}) {
