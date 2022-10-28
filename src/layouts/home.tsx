@@ -11,7 +11,7 @@ export const HomeLayout: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <>
-      <main className="h-full">
+      <main className="h-full flex flex-col">
         <NavBar className="flex justify-between">
           <div className="bg-gray-900 text-primary_light-300 dark:bg-white/50 dark:text-gray-900 py-0 px-2 rounded-sm font-black align-middle">
             Poddy McPoddface
@@ -23,7 +23,7 @@ export const HomeLayout: React.FC<{ children: React.ReactNode }> = ({
             onChange={(checked) => setDarkMode(checked)}
           />
         </NavBar>
-        <div>{children}</div>
+        <div className="flex-1">{children}</div>
       </main>
     </>
   );
