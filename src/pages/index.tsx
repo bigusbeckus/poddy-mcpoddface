@@ -1,83 +1,95 @@
-import { podcastSearchLink, SearchReturn } from "../libs/itunes-podcast";
-import { NextPageWithRootLayout } from "./_app";
 import { useQuery } from "@tanstack/react-query";
-import { HomeLayout } from "../layouts/home";
-import { ChangeEvent, ReactElement, Suspense, useState } from "react";
-import { debounce } from "lodash-es";
-import { Button } from "../components/button";
+import { differenceInMilliseconds } from "date-fns";
+import { ChangeEvent, ReactElement, useState } from "react";
 import { TextField } from "../components/input/text-field";
+import { Loading } from "../components/loading";
 import { PodcastList } from "../components/podcast-list";
+import { HomeLayout } from "../layouts/home";
+import { podcastSearchLink } from "../libs/itunes-podcast";
+import { NextPageWithRootLayout } from "./_app";
 
-const Home: NextPageWithRootLayout = (props) => {
+type DebounceParams = { lastInvoked: Date; refetchHandler: NodeJS.Timeout };
+
+const Home: NextPageWithRootLayout = () => {
   const [terms, setTerms] = useState("");
-  // const [dialogOpen, setDialogOpen] = useState(false);
 
-  // const [selection, setSelection] = useState(null as PodcastResult | null);
+  const searchLink = podcastSearchLink().term(terms);
 
-  const searchLink = podcastSearchLink().term(terms).country("de");
-
-  const { data, error, isLoading, refetch } = useQuery(
+  const { data, error, isFetching, refetch } = useQuery(
     ["podcasts"],
     searchLink.fetch
   );
 
-  const [view, setView] = useState("grid");
+  const debounceMs = 500;
+  const [debounceParams, setDebounceParams] = useState<
+    DebounceParams | undefined
+  >();
 
-  function toggleView() {
-    if (view === "grid") {
-      setView("list");
-    } else {
-      setView("grid");
-    }
+  function debounceQuery() {
+    setDebounceParams({
+      lastInvoked: new Date(),
+      refetchHandler: setTimeout(() => {
+        refetch();
+        setDebounceParams(undefined);
+      }, debounceMs),
+    });
+  }
+
+  function resetDebounce(debounceParams: DebounceParams) {
+    clearTimeout(debounceParams.refetchHandler);
+    debounceQuery();
   }
 
   function handleTermsInput(event: ChangeEvent<HTMLInputElement>) {
     setTerms(event.target.value);
-    debounce(refetch, 500, {
-      leading: false,
-      trailing: true,
-    })();
+    const now = new Date();
+    // Has been invoked before
+    if (debounceParams) {
+      // If invoked less than [debounceMs] ago, reset
+      if (
+        differenceInMilliseconds(now, debounceParams.lastInvoked) < debounceMs
+      ) {
+        resetDebounce(debounceParams);
+      }
+    }
+    // First invocation
+    else {
+      debounceQuery();
+    }
   }
 
-  // function handleItemClick(item: PodcastResult) {
-  //   setSelection(item);
-  //   setDialogOpen(true);
-  // }
-
-  if (isLoading) return <h1>Loading...</h1>;
-
-  if (error instanceof Error) return <h1>{error.message}</h1>;
-
   return (
-    <div className="p-8">
-      {/* <input
-        type="text"
-        value={terms}
-        placeholder="Search"
-        onChange={handleTermsInput}
-        className="bg-black/10 dark:bg-white/10 px-4 py-4 text-xl font-thin rounded-md"
-      /> */}
-      {/* <Link href="/">To second page</Link> */}
-      <div className="py-2">Search Link: {searchLink.getLink()}</div>
-      <div className="flex justify-between">
+    <div className={`h-full p-8 flex flex-col justify-center items-center`}>
+      <div
+        className={`transition duration-1000 overflow-hidden flex flex-col justify-end ${
+          terms ? "h-0 opacity-0" : "pb-16 -mt-16"
+        }`}>
+        <h1 className={`text-6xl font-extrabold`}>Podcasts Everywhere</h1>
+      </div>
+      <div
+        className={`transition duration-300 text-xl ${
+          terms ? "scale-90" : ""
+        }`}>
         <TextField
           value={terms}
           onChange={handleTermsInput}
           placeholder="Search"
         />
-        <Button onClick={toggleView}>
-          {view === "grid" ? "List View" : "Grid View"}
-        </Button>
       </div>
-      <hr className="my-4 border-white/10" />
-
-      {data && (data as SearchReturn).resultCount > 0 ? (
-        <PodcastList podcasts={data.results} view={view} />
-      ) : terms ? (
-        "No results found"
-      ) : (
-        "Start typing to get results"
-      )}
+      <div className={`w-full p-8 ${terms ? "flex-1" : ""}`}>
+        {isFetching ? (
+          <Loading />
+        ) : error ? (
+          <div>
+            Error:{" "}
+            {error instanceof Error
+              ? (error as Error).message
+              : "An error occured"}
+          </div>
+        ) : (
+          <PodcastList podcasts={data ? data.results : []} />
+        )}
+      </div>
     </div>
   );
 };
