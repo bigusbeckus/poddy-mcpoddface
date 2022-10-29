@@ -1,14 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { differenceInMilliseconds } from "date-fns";
 import { ChangeEvent, ReactElement, useState } from "react";
 import { TextField } from "../components/input/text-field";
 import { Loading } from "../components/loading";
 import { PodcastList } from "../components/podcast-list";
+import { useDebounce } from "../hooks/debounce";
 import { HomeLayout } from "../layouts/home";
 import { podcastSearchLink } from "../libs/itunes-podcast";
 import { NextPageWithRootLayout } from "./_app";
-
-type DebounceParams = { lastInvoked: Date; refetchHandler: NodeJS.Timeout };
 
 const Home: NextPageWithRootLayout = () => {
   const [terms, setTerms] = useState("");
@@ -19,43 +17,11 @@ const Home: NextPageWithRootLayout = () => {
     ["podcasts"],
     searchLink.fetch
   );
-
-  const debounceMs = 500;
-  const [debounceParams, setDebounceParams] = useState<
-    DebounceParams | undefined
-  >();
-
-  function debounceQuery() {
-    setDebounceParams({
-      lastInvoked: new Date(),
-      refetchHandler: setTimeout(() => {
-        refetch();
-        setDebounceParams(undefined);
-      }, debounceMs),
-    });
-  }
-
-  function resetDebounce(debounceParams: DebounceParams) {
-    clearTimeout(debounceParams.refetchHandler);
-    debounceQuery();
-  }
+  const debouncedRefetch = useDebounce(refetch);
 
   function handleTermsInput(event: ChangeEvent<HTMLInputElement>) {
     setTerms(event.target.value);
-    const now = new Date();
-    // Has been invoked before
-    if (debounceParams) {
-      // If invoked less than [debounceMs] ago, reset
-      if (
-        differenceInMilliseconds(now, debounceParams.lastInvoked) < debounceMs
-      ) {
-        resetDebounce(debounceParams);
-      }
-    }
-    // First invocation
-    else {
-      debounceQuery();
-    }
+    debouncedRefetch();
   }
 
   return (
