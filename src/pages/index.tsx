@@ -25,35 +25,47 @@ const Home: NextPageWithRootLayout = () => {
   }
 
   return (
-    <div className={`h-full p-8 flex flex-col justify-center items-center`}>
-      <div
-        className={`transition duration-1000 overflow-hidden flex flex-col justify-end ${
-          terms ? "h-0 opacity-0" : "pb-16 -mt-16"
-        }`}>
-        <h1 className={`text-6xl font-extrabold`}>Podcasts Everywhere</h1>
+    <div className={`h-full px-8`}>
+      <div className={`fixed top-0 w-full ${terms ? "" : "h-100"}`}>
+        <div
+          className={`transition-all duration-500 overflow-hidden flex flex-col justify-end ${
+            terms ? "h-0 opacity-0" : "h-half-screen pb-8"
+          }`}>
+          <h1 className={`text-6xl text-center font-extrabold`}>
+            Podcasts Everywhere
+          </h1>
+        </div>
+        <div
+          className={`transition duration-100 flex justify-center text-xl w-full z-10 ${
+            terms ? "py-2" : ""
+          }`}>
+          <TextField
+            value={terms}
+            onChange={handleTermsInput}
+            placeholder="Search"
+            className={terms ? "scale-90" : ""}
+          />
+        </div>
       </div>
       <div
-        className={`transition duration-300 text-xl ${
-          terms ? "scale-90" : ""
+        className={`transition-all duration-500 w-full py-8 overflow-hidden ${
+          terms ? (isFetching ? "h-2/3" : "h-min") : "h-0 opacity-0"
         }`}>
-        <TextField
-          value={terms}
-          onChange={handleTermsInput}
-          placeholder="Search"
-        />
-      </div>
-      <div className={`w-full p-8 ${terms ? "flex-1" : ""}`}>
-        {isFetching ? (
-          <Loading />
-        ) : error ? (
-          <div>
-            Error:{" "}
-            {error instanceof Error
-              ? (error as Error).message
-              : "An error occured"}
-          </div>
+        {terms ? (
+          isFetching ? (
+            <Loading />
+          ) : error ? (
+            <div>
+              Error:{" "}
+              {error instanceof Error
+                ? (error as Error).message
+                : "An error occured"}
+            </div>
+          ) : (
+            <PodcastList podcasts={data ? data.results : []} />
+          )
         ) : (
-          <PodcastList podcasts={data ? data.results : []} />
+          <div></div>
         )}
       </div>
     </div>
