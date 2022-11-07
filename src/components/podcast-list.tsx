@@ -104,7 +104,7 @@ export const PodcastList: React.FC<PodcastListProps> = ({ podcasts, view }) => {
   return (
     <>
       {/* {modal} */}
-      <div className="grid grid-cols-8 gap-1">
+      <div className="grid grid-cols-8 gap-2">
         {podcasts.map((result) => (
           <PodcastThumb
             key={result.collectionId}

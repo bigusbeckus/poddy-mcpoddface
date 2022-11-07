@@ -20,14 +20,14 @@ export const PodcastThumb: React.FC<PodcastThumbProps> = ({
       <div
         key={id}
         // onClick={() => handleItemClick(result)}
-        className="hover:bg-background_light/20 hover:dark:bg-background_dark/20 p-1 cursor-pointer rounded-md transition duration-300">
+        className="hover:bg-background_light/20 hover:dark:bg-background_dark/20 p-1 cursor-pointer rounded-md transition duration-100">
         {/* <img src={result.artworkUrl600} className="w-full rounded-md aspect-square object-cover" /> */}
         <FetchedImage
           src={artworkUrl}
           alt={`${name} artwork`}
           className="w-full rounded-md aspect-square overflow-hidden"
         />
-        <div className="mt-2 leading-tight text-center text-ellipsis">
+        <div className="mt-2 leading-tight text-center text-ellipsis line-clamp-1">
           {name}
         </div>
       </div>

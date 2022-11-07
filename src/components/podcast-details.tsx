@@ -66,15 +66,15 @@ export const PodcastDetails: React.FC<PodcastDetailsProps> = ({ podcast }) => {
 
   return (
     <>
-      <h1 className="text-5xl">{data.feedTitle}</h1>
-      <div className="flex mb-10">
+      <div className="flex">
         {/* Thumbnail and details */}
-        <div className="shrink w-96 py-8">
+        <div className="shrink w-96 sticky top-24 flex-align-start">
           <FetchedImage
             src={data.itunesArtworkUrl600}
             alt={`${data.feedTitle} thumbnail`}
-            className=""
+            className="rounded-md"
           />
+          <h1 className="text-3xl text-center py-4">{data.feedTitle}</h1>
           <div className="py-2 flex flex-wrap justify-center gap-2">
             {data.feedItunesCategories?.map((category: iTunesCategory) => (
               <span
@@ -86,7 +86,7 @@ export const PodcastDetails: React.FC<PodcastDetailsProps> = ({ podcast }) => {
           </div>
         </div>
         {/* Episodes */}
-        <div className="grow w-96 pl-16 py-8 grid grid-cols-1 gap-3">
+        <div className="grow w-96 pl-16 grid grid-cols-1 gap-3">
           {/* <h1 className="text-3xl">Episodes</h1> */}
           {data.episodes.map((episode: Episode) => (
             <div
