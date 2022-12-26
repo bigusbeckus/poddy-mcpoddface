@@ -1,16 +1,18 @@
 import Link from "next/link";
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, FocusEvent, useState } from "react";
 import { atom, useAtom } from "jotai";
 import { useDebounce } from "../hooks/debounce";
 import { NextPage } from "next";
+import { Search } from "react-feather";
 
 const searchAtom = atom("");
 
 const NuHome: NextPage = () => {
-  const navHeightCollapsed = "h-12",
-    navHeightExpanded = "h-full";
+  const inputBackground =
+    "backdrop-blur-sm bg-black/20 dark:bg-white/10 outline-none border-transparent border-solid border-2";
 
   const [isNavExpanded, setIsNavExpanded] = useState(true);
+  const [isSearchInputFocused, setIsSearchInputFocused] = useState(false);
 
   const [localTerms, setLocalTerms] = useState("");
   const [terms, setTerms] = useAtom(searchAtom);
@@ -29,17 +31,18 @@ const NuHome: NextPage = () => {
     setTermsDebounced(e.target.value);
   }
 
+  function handleSearchFieldFocus(e: FocusEvent<HTMLInputElement>) {
+    setIsSearchInputFocused(e.type === "focus");
+  }
+
   return (
     <>
       <div className="h-full overflow-y-scroll bg-[url('../data/slanted-thumbs-gradient.png')] bg-cover bg-no-repeat bg-blend-color-burn">
         <div className="h-full dark:bg-black/80">
-          {/* <NavBar className="bg-red-900/10 w-screen flex justify-between fixed top-0 z-10">
-          nav
-        </NavBar> */}
           <header className="py-2 px-8">
             {/* Nav bar */}
             <nav
-              className={`${navHeightCollapsed} w-full align-middle flex flex-col justify-center`}
+              className={`h-12 w-full align-middle flex flex-col justify-center`}
             >
               <div className="flex justify-between">
                 <div className="flex flex-col justify-center">
@@ -72,22 +75,38 @@ const NuHome: NextPage = () => {
             </nav>
           </header>
           {/* Landing content */}
-          <main className="pt-72 h-half-screen">
+          <main className="flex flex-col justify-end h-half-screen">
             <div>
               <h1 className="text-4xl font-extrabold dark:text-white/80 text-center">
                 Listen Everywhere
               </h1>
-              <h2 className="mt-1 text-lg font-light dark:text-white/70 text-center">
+              <h2 className="mt-1 text-lg dark:font-light dark:text-white/50 text-center">
                 Podcast sync without the fuss
               </h2>
             </div>
-            <div className="mt-8 flex justify-center">
+            <div className="mt-10 flex justify-center">
+              <div
+                className={`pl-2 pr-1 rounded-l-lg ${inputBackground} border-r-0 flex flex-col justify-center ${
+                  isSearchInputFocused
+                    ? "border-l-black/30 border-y-black/30 dark:border-l-white/10 dark:border-y-white/10"
+                    : ""
+                }`}
+              >
+                <Search
+                  size={20}
+                  className={`inline-block transition duration-100 ${
+                    isSearchInputFocused ? "opacity-100" : "opacity-50"
+                  }`}
+                />
+              </div>
               <input
                 type="text"
                 placeholder="Search"
                 value={localTerms}
                 onChange={handleInputChange}
-                className="px-4 py-1 text-lg rounded-md bg-black/10 dark:bg-white/10 outline-none border-transparent focus:border-black/10 dark:focus:border-white/10 border-solid border-2 transition duration-100"
+                className={`px-3 py-2 w-96 placeholder-black/70 dark:placeholder-white/50 text-lg rounded-r-lg ${inputBackground} border-l-0 transition focus:border-y-black/30 dark:focus:border-y-white/10 focus:border-r-black/30 dark:focus:border-r-white/10 duration-100`}
+                onFocus={handleSearchFieldFocus}
+                onBlur={handleSearchFieldFocus}
               />
             </div>
           </main>
