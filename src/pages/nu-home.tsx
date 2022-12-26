@@ -39,7 +39,7 @@ const NuHome: NextPage = () => {
     <>
       <div className="h-full overflow-y-scroll bg-[url('../data/slanted-thumbs-gradient.png')] bg-cover bg-no-repeat bg-blend-color-burn">
         <div className="h-full dark:bg-black/80">
-          <header className="py-2 px-8">
+          <header className="py-6 px-8">
             {/* Nav bar */}
             <nav
               className={`h-12 w-full align-middle flex flex-col justify-center`}
@@ -52,22 +52,28 @@ const NuHome: NextPage = () => {
                     </div>
                   </Link>
                 </div>
+                {/*
                 <div className="flex justify-end">
                   <input
                     type="text"
                     value={localTerms}
                     placeholder={"Search"}
                     onChange={handleInputChange}
-                    className="px-3 py-1 rounded-lg bg-black/10 dark:bg-white/10 outline-none border-transparent focus:border-black/10 dark:focus:border-white/10 border-solid border-2 transition duration-100"
+                    className="px-3 py-1 rounded-lg bg-black/10 dark:bg-white/10 outline-none border-transparent focus:border-black/10 dark:focus:border-white/10 border-solid border-2 transition duration-150"
                   />
                 </div>
+                */}
                 <div className="flex flex-col justify-center">
-                  <div className="flex justify-end gap-4">
+                  <div className="flex justify-end items-center gap-8">
                     <Link href="/login">
-                      <span className="font-bold">Login</span>
+                      <a className="font-bold hover:text-gray-300 transition duration-150">
+                        Sign in
+                      </a>
                     </Link>
-                    <Link href="#">
-                      <span className="font-bold">Sign up</span>
+                    <Link href="/signup">
+                      <a className="font-bold bg-green-900 hover:bg-green-800 px-4 py-2 rounded-lg transition duration-150">
+                        Create a new account
+                      </a>
                     </Link>
                   </div>
                 </div>
@@ -75,7 +81,7 @@ const NuHome: NextPage = () => {
             </nav>
           </header>
           {/* Landing content */}
-          <main className="flex flex-col justify-end h-half-screen">
+          <main className="flex flex-col justify-end pb-10 h-half-screen">
             <div>
               <h1 className="text-4xl font-extrabold dark:text-white/80 text-center">
                 Listen Everywhere
@@ -94,7 +100,7 @@ const NuHome: NextPage = () => {
               >
                 <Search
                   size={20}
-                  className={`inline-block transition duration-100 ${
+                  className={`inline-block transition duration-150 ${
                     isSearchInputFocused ? "opacity-100" : "opacity-50"
                   }`}
                 />
@@ -104,7 +110,7 @@ const NuHome: NextPage = () => {
                 placeholder="Search"
                 value={localTerms}
                 onChange={handleInputChange}
-                className={`px-3 py-2 w-96 placeholder-black/70 dark:placeholder-white/50 text-lg rounded-r-lg ${inputBackground} border-l-0 transition focus:border-y-black/30 dark:focus:border-y-white/10 focus:border-r-black/30 dark:focus:border-r-white/10 duration-100`}
+                className={`px-3 py-2 w-96 placeholder-black/70 dark:placeholder-white/50 text-lg rounded-r-lg ${inputBackground} border-l-0 transition focus:border-y-black/30 dark:focus:border-y-white/10 focus:border-r-black/30 dark:focus:border-r-white/10 duration-150`}
                 onFocus={handleSearchFieldFocus}
                 onBlur={handleSearchFieldFocus}
               />
