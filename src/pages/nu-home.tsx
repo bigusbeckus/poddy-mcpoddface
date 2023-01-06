@@ -4,6 +4,10 @@ import { atom, useAtom } from "jotai";
 import { useDebounce } from "../hooks/debounce";
 import { NextPage } from "next";
 import { Search } from "react-feather";
+import { MusicPlayer } from "../components/chat-gpt-player";
+import { useQuery } from "@tanstack/react-query";
+import { podcastSearchLink } from "../libs/itunes-podcast";
+import { useRecentSearches } from "../hooks/recent-searches";
 
 const searchAtom = atom("");
 
@@ -13,13 +17,26 @@ const NuHome: NextPage = () => {
 
   const [isNavExpanded, setIsNavExpanded] = useState(true);
   const [isSearchInputFocused, setIsSearchInputFocused] = useState(false);
+  const [isSearchCardFocused, setIsSearchCardFocused] = useState(false);
 
-  const [localTerms, setLocalTerms] = useState("");
+  // const [localTerms, setLocalTerms] = useState("");
   const [terms, setTerms] = useAtom(searchAtom);
 
-  const setTermsDebounced = useDebounce((value: string) => {
-    setTerms(value);
-  });
+  const searchLink = podcastSearchLink().term(terms).limit(3);
+  const { data, error, isFetching, refetch, isLoading, isInitialLoading } =
+    useQuery({
+      queryKey: ["podcasts"],
+      queryFn: searchLink.fetch,
+      enabled: false,
+    });
+
+  // const setTermsDebounced = useDebounce((value: string) => {
+  //   setTerms(value);
+  // });
+
+  const debouncedRefetch = useDebounce(refetch);
+
+  const { recentSearches } = useRecentSearches();
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
     if (!e.target.value) {
@@ -27,12 +44,43 @@ const NuHome: NextPage = () => {
     } else if (isNavExpanded) {
       setIsNavExpanded(false);
     }
-    setLocalTerms(e.target.value);
-    setTermsDebounced(e.target.value);
+    // setLocalTerms(e.target.value);
+    // setTermsDebounced(e.target.value);
+    setTerms(e.target.value);
+    // if (e.target.value.length > 0 && !isSearchCardFocused) {
+    //   setIsSearchCardFocused(true);
+    // }
+    if (e.target.value.length > 0) {
+      debouncedRefetch();
+    }
   }
 
   function handleSearchFieldFocus(e: FocusEvent<HTMLInputElement>) {
-    setIsSearchInputFocused(e.type === "focus");
+    const isFocused = e.type === "focus";
+    setIsSearchInputFocused(isFocused);
+    setIsSearchCardFocused(isFocused);
+  }
+
+  function handleSearchCardFocus(e: FocusEvent<HTMLDivElement>) {
+    const hasFocus = e.type === "focus";
+    // On focus
+    if (hasFocus) {
+      if (!isSearchCardFocused) {
+        setIsSearchCardFocused(true);
+      }
+    }
+    // On blur
+    else {
+      if (isSearchCardFocused && !isSearchInputFocused) {
+        setIsSearchCardFocused(false);
+      }
+    }
+  }
+
+  function showSearchCard() {
+    return (
+      isSearchInputFocused && (terms.length > 0 || recentSearches.length > 0)
+    );
   }
 
   return (
@@ -66,7 +114,7 @@ const NuHome: NextPage = () => {
                 <div className="flex flex-col justify-center">
                   <div className="flex justify-end items-center gap-8">
                     <Link href="/login">
-                      <a className="font-bold hover:text-gray-300 transition duration-150">
+                      <a className="font-bold hover:text-gray-300 transition">
                         Sign in
                       </a>
                     </Link>
@@ -81,7 +129,11 @@ const NuHome: NextPage = () => {
             </nav>
           </header>
           {/* Landing content */}
-          <main className="flex flex-col justify-end pb-10 h-half-screen">
+          <main
+            className={`flex flex-col justify-end h-half-screen transition-[padding] duration-300 ${
+              showSearchCard() ? "pb-10 " : ""
+            }`}
+          >
             <div>
               <h1 className="text-4xl font-extrabold dark:text-white/80 text-center">
                 Listen Everywhere
@@ -108,13 +160,31 @@ const NuHome: NextPage = () => {
               <input
                 type="text"
                 placeholder="Search"
-                value={localTerms}
+                value={terms}
                 onChange={handleInputChange}
                 className={`px-3 py-2 w-96 placeholder-black/70 dark:placeholder-white/50 text-lg rounded-r-lg ${inputBackground} border-l-0 transition focus:border-y-black/30 dark:focus:border-y-white/10 focus:border-r-black/30 dark:focus:border-r-white/10 duration-150`}
                 onFocus={handleSearchFieldFocus}
                 onBlur={handleSearchFieldFocus}
               />
             </div>
+            <div className="w-full flex justify-center items-top mt-1">
+              <div
+                className={`fixed overflow-hidden rounded-md origin-top backdrop-blur-md ${
+                  showSearchCard() ? "" : "opacity-0"
+                } transition-opacity`}
+                onFocus={handleSearchCardFocus}
+                onBlur={handleSearchCardFocus}
+              >
+                <div className="px-6 py-2 bg-white/20 rounded-md max-h-80">
+                  <div className="w-96">Search Results</div>
+                </div>
+              </div>
+            </div>
+            {/*
+            <footer className="-z-1 fixed bottom-0 left-0 w-screen">
+              <MusicPlayer />
+            </footer>
+            */}
           </main>
         </div>
       </div>
