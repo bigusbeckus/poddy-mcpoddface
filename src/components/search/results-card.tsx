@@ -21,8 +21,7 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
   onSearchCardShow,
   onSearchCardHide,
 }) => {
-  const inputBackground =
-    "backdrop-blur-sm bg-black/20 dark:bg-white/10 outline-none border-transparent border-solid border-2";
+  const inputBackground = "";
 
   const [terms, setTerms] = useAtom(searchAtom);
   const { recentSearches, addToRecentSearches } = useRecentSearches();
@@ -79,10 +78,19 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
   return (
     <div className={className}>
       <div className="flex justify-center">
-        <div
-          className={`pl-2 pr-1 rounded-l-lg ${inputBackground} border-r-0 flex flex-col justify-center ${
+        <input
+          type="text"
+          placeholder="Search"
+          value={terms}
+          onChange={handleInputChange}
+          className={`px-3 py-2 w-96 placeholder-black/70 dark:placeholder-white/50 text-lg rounded-l-lg  backdrop-blur-sm bg-black/20 dark:bg-white/10 outline-none border-transparent border-solid border-2 border-r-1 transition focus:border-y-black/30 dark:focus:border-y-white/10 border-r-black/30 dark:border-r-white/5 dark:focus:border-x-white/10 duration-150`}
+          onFocus={handleSearchFieldFocus}
+          onBlur={handleSearchFieldFocus}
+        />
+        <button
+          className={`pl-2 pr-3 rounded-r-lg backdrop-blur-sm bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 transition-colors border-transparent border-solid border-2 border-l-0 flex flex-col justify-center ${
             isSearchInputFocused
-              ? "border-l-black/30 border-y-black/30 dark:border-l-white/10 dark:border-y-white/10"
+              ? "border-r-black/30 border-y-black/30 dark:border-r-white/10 dark:border-y-white/10"
               : ""
           }`}
         >
@@ -92,16 +100,7 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
               isSearchInputFocused ? "opacity-100" : "opacity-50"
             }`}
           />
-        </div>
-        <input
-          type="text"
-          placeholder="Search"
-          value={terms}
-          onChange={handleInputChange}
-          className={`px-3 py-2 w-96 placeholder-black/70 dark:placeholder-white/50 text-lg rounded-r-lg ${inputBackground} border-l-0 transition focus:border-y-black/30 dark:focus:border-y-white/10 focus:border-r-black/30 dark:focus:border-r-white/10 duration-150`}
-          onFocus={handleSearchFieldFocus}
-          onBlur={handleSearchFieldFocus}
-        />
+        </button>
       </div>
       <div className="w-full flex justify-center items-top mt-1">
         <div
