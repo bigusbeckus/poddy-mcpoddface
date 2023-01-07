@@ -5,6 +5,8 @@ import { Search } from "react-feather";
 import { useDebounce } from "../../hooks/debounce";
 import { useRecentSearches } from "../../hooks/recent-searches";
 import { podcastSearchLink } from "../../libs/itunes-podcast";
+import { Loading } from "../loading";
+import { ProgressCircular } from "../progress";
 
 type SearchResultsCardProps = {
   className?: string;
@@ -107,8 +109,31 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
             showSearchCard() ? "" : "opacity-0"
           } transition-opacity`}
         >
-          <div className="px-6 py-2 bg-white/20 rounded-md max-h-80">
-            <div className="w-96">Search Results</div>
+          <div className="px-6 py-3 bg-white/20 rounded-md max-h-80">
+            <div className="w-96">
+              {isInitialLoading ? (
+                <ProgressCircular className="h-8 stroke-green-400" />
+              ) : terms.length > 0 ? (
+                data && data.resultCount > 0 ? (
+                  data.results.map((result) => (
+                    <div key={result.trackId}> {result.trackName} </div>
+                  ))
+                ) : error ? (
+                  <div>
+                    {" "}
+                    {error instanceof Error ? error.message : "Network error"}
+                  </div>
+                ) : (
+                  "No results found"
+                )
+              ) : recentSearches.length > 0 ? (
+                recentSearches.map((item) => (
+                  <div key={item.searchTerm}> {item.searchTerm} </div>
+                ))
+              ) : (
+                "Start typing to see results"
+              )}
+            </div>
           </div>
         </div>
       </div>
