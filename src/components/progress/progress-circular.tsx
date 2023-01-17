@@ -1,12 +1,10 @@
-import { FC } from "react";
-
 type ProgressCircularProps = {
   percent?: number;
   thickness?: number;
   className?: string;
 };
 
-export const ProgressCircular: FC<ProgressCircularProps> = ({
+export const ProgressCircular: React.FC<ProgressCircularProps> = ({
   percent,
   thickness,
   className,
@@ -29,8 +27,9 @@ export const ProgressCircular: FC<ProgressCircularProps> = ({
           width={30}
           height={30}
           className={`-rotate-90 w-full h-full ${
-            className ? className : "stroke-indigo-800"
-          }`}>
+            className ? className : "stroke-green-600"
+          }`}
+        >
           <circle
             cx={circleDimension}
             cy={circleDimension}
