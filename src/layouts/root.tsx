@@ -1,5 +1,7 @@
 import Head from "next/head";
-import React from "react";
+import { NextPage } from "next/types";
+import { ReactElement, ReactNode } from "react";
+import { RouterProgres } from "../components/router-progress";
 import { ThemeContext, useThemeContextState } from "../context/theme";
 
 type RootLayoutProps = {
@@ -27,11 +29,19 @@ export const RootLayout: React.FC<RootLayoutProps> = ({
       </Head>
       <ThemeContext.Provider value={[darkMode, setDarkMode]}>
         {/* <div className={"h-full" + (darkMode ? " dark" : "")}> */}
-        <div className="h-full overflow-hidden dark:bg-transparent dark:text-inherit bg-white text-black">
+        <div className="h-full overflow-hidden dark:bg-black/40 dark:text-inherit bg-white text-black">
+          <RouterProgres />
           {children}
           {/* </div> */}
         </div>
       </ThemeContext.Provider>
     </>
   );
+};
+
+export type NextPageWithRootLayout<
+  P = Record<string, unknown>,
+  IP = P
+> = NextPage<P, IP> & {
+  getLayout?: (page: ReactElement) => ReactNode;
 };
