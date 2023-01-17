@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
-const RECENT_SEARCHES_KEY = "recent_searches";
+const RECENT_SEARCHES_KEY = "recent-searches";
 const RECENT_SEARCH_ITEMS_COUNT = 10;
 
-type RecentSearchItem = {
+export type RecentSearchItem = {
   id: number;
   searchTerm: string;
   searchedAt: number;
@@ -31,7 +31,18 @@ export function useRecentSearches() {
   }, []);
 
   const addToRecentSearches = (searchTerm: string) => {
-    const existingIds = recentSearches.map((item) => item.id);
+    // const existingIds = recentSearches.map((item) => item.id);
+    const existingIds: number[] = [];
+    const existingNames: string[] = [];
+    recentSearches.forEach((item) => {
+      existingIds.push(item.id);
+      existingNames.push(item.searchTerm.toLowerCase());
+    });
+
+    if (existingNames.includes(searchTerm.toLowerCase())) {
+      return;
+    }
+
     let id = 0;
     do {
       id = Math.floor(Math.random() * RECENT_SEARCH_ITEMS_COUNT);
