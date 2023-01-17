@@ -4,6 +4,7 @@ const RECENT_SEARCHES_KEY = "recent_searches";
 const RECENT_SEARCH_ITEMS_COUNT = 10;
 
 type RecentSearchItem = {
+  id: number;
   searchTerm: string;
   searchedAt: number;
 };
@@ -30,10 +31,18 @@ export function useRecentSearches() {
   }, []);
 
   const addToRecentSearches = (searchTerm: string) => {
+    const existingIds = recentSearches.map((item) => item.id);
+    let id = 0;
+    do {
+      id = Math.floor(Math.random() * RECENT_SEARCH_ITEMS_COUNT);
+    } while (existingIds.includes(id));
+
     const searchItem = {
+      id,
       searchTerm,
       searchedAt: Date.now(),
     };
+
     const updatedRecentSearches = [
       searchItem,
       ...recentSearches.slice(
