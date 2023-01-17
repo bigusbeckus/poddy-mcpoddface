@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { NextPage } from "next";
-import { MusicPlayer } from "../components/chat-gpt-player";
 import { useState } from "react";
 import { SearchResultsCard } from "../components/search/results-card";
 
@@ -28,17 +27,6 @@ const NuHome: NextPage = () => {
                     </div>
                   </Link>
                 </div>
-                {/*
-                <div className="flex justify-end">
-                  <input
-                    type="text"
-                    value={localTerms}
-                    placeholder={"Search"}
-                    onChange={handleInputChange}
-                    className="px-3 py-1 rounded-lg bg-black/10 dark:bg-white/10 outline-none border-transparent focus:border-black/10 dark:focus:border-white/10 border-solid border-2 transition duration-150"
-                  />
-                </div>
-                */}
                 <div className="flex flex-col justify-center">
                   <div className="flex justify-end items-center gap-8">
                     <Link href="/login">
@@ -58,8 +46,8 @@ const NuHome: NextPage = () => {
           </header>
           {/* Landing content */}
           <main
-            className={`flex flex-col justify-end h-half-screen transition-[padding] duration-300 ${
-              searchCardShown ? "pb-10" : ""
+            className={`flex flex-col justify-end h-half-screen max-h-[128rem] transition-all ease-out duration-300 ${
+              searchCardShown ? "pb-10 h-72" : ""
             }`}
           >
             <div>
@@ -75,11 +63,6 @@ const NuHome: NextPage = () => {
               onSearchCardShow={handleSearchVisibility}
               onSearchCardHide={handleSearchVisibility}
             />
-            {/*
-            <footer className="-z-1 fixed bottom-0 left-0 w-screen">
-              <MusicPlayer />
-            </footer>
-            */}
           </main>
         </div>
       </div>

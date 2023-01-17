@@ -243,9 +243,10 @@ export function podcastSearchLink() {
   }
 
   async function fetch(): Promise<SearchReturn> {
-    return _term
-      ? (await axios.get(getLink())).data
-      : Promise.resolve({ resultCount: 0, results: [] } as SearchReturn);
+    return (await axios.get(getLink())).data;
+    // return _term
+    //   ? (await axios.get(getLink())).data
+    //   : Promise.resolve({ resultCount: 0, results: [] } as SearchReturn);
   }
 
   const obj = {

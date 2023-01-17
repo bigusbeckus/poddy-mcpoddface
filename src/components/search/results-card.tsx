@@ -1,18 +1,21 @@
 import { useQuery } from "@tanstack/react-query";
 import { atom, useAtom } from "jotai";
-import { useState, ChangeEvent, FocusEvent } from "react";
+import Link from "next/link";
+import { ChangeEvent, FocusEvent, useState } from "react";
 import { Search } from "react-feather";
 import { useDebounce } from "../../hooks/debounce";
 import { useRecentSearches } from "../../hooks/recent-searches";
 import { podcastSearchLink } from "../../libs/itunes-podcast";
-import { Loading } from "../loading";
-import { ProgressCircular } from "../progress";
+import { ProgressCircular } from "../progress/progress-circular";
+import { SearchResultItem } from "./results-item";
 
 type SearchResultsCardProps = {
   className?: string;
   onSearchCardShow?: (eventType: string) => void;
   onSearchCardHide?: (eventType: string) => void;
 };
+
+const SEARCH_ITEMS_LIMIT = 8;
 
 export const searchAtom = atom("");
 
@@ -21,18 +24,15 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
   onSearchCardShow,
   onSearchCardHide,
 }) => {
-  const inputBackground = "";
-
   const [terms, setTerms] = useAtom(searchAtom);
   const { recentSearches, addToRecentSearches } = useRecentSearches();
 
-  const searchLink = podcastSearchLink().term(terms).limit(3);
-  const { data, error, isFetching, refetch, isLoading, isInitialLoading } =
-    useQuery({
-      queryKey: ["podcasts"],
-      queryFn: searchLink.fetch,
-      enabled: false,
-    });
+  const searchLink = podcastSearchLink().term(terms).limit(SEARCH_ITEMS_LIMIT);
+  const { data, error, refetch, isLoading } = useQuery({
+    queryKey: ["podcasts"],
+    queryFn: searchLink.fetch,
+    enabled: false,
+  });
 
   const [isSearchInputFocused, setIsSearchInputFocused] = useState(false);
   const [isSearchCardShown, setIsSearchCardShown] = useState(false);
@@ -58,20 +58,23 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
 
   function handleSearchFieldFocus(e: FocusEvent<HTMLInputElement>) {
     const hasFocus = e.type === "focus";
+
     setIsSearchInputFocused(hasFocus);
 
-    setIsSearchCardShown(hasFocus);
+    // setIsSearchCardShown(hasFocus);
 
     if (hasFocus) {
+      setIsSearchCardShown(true);
       if (onSearchCardShow && (terms.length > 0 || recentSearches.length > 0)) {
         onSearchCardShow(e.type);
       }
     } else if (onSearchCardHide) {
-      onSearchCardHide(e.type);
+      // onSearchCardHide(e.type);
     }
   }
 
   function showSearchCard() {
+    // return true;
     return isSearchCardShown && (terms.length > 0 || recentSearches.length > 0);
   }
 
@@ -108,29 +111,38 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
             showSearchCard() ? "" : "opacity-0"
           } transition-opacity`}
         >
-          <div className="px-6 py-3 bg-white/20 rounded-md max-h-80">
-            <div className="w-96">
-              {isInitialLoading ? (
+          <div className="px-2 py-2 bg-white/20 border-solid border-1 border-white/40 rounded-md max-h-96 overflow-y-scroll">
+            <div className="w-[26rem]">
+              {isLoading ? (
                 <ProgressCircular className="h-8 stroke-green-400" />
               ) : terms.length > 0 ? (
                 data && data.resultCount > 0 ? (
                   data.results.map((result) => (
-                    <div key={result.trackId}> {result.trackName} </div>
+                    <Link
+                      key={result.collectionId}
+                      href={{
+                        pathname: `/podcast/${result.collectionId}`,
+                      }}
+                      passHref
+                    >
+                      <a>
+                        <SearchResultItem result={result} />
+                      </a>
+                    </Link>
                   ))
                 ) : error ? (
-                  <div>
-                    {" "}
+                  <div className="px-2">
                     {error instanceof Error ? error.message : "Network error"}
                   </div>
                 ) : (
-                  "No results found"
+                  <div className="px-2">No results found</div>
                 )
               ) : recentSearches.length > 0 ? (
                 recentSearches.map((item) => (
-                  <div key={item.searchTerm}> {item.searchTerm} </div>
+                  <div key={item.searchTerm}>{item.searchTerm}</div>
                 ))
               ) : (
-                "Start typing to see results"
+                <div className="px-2">Start typing to see results</div>
               )}
             </div>
           </div>
