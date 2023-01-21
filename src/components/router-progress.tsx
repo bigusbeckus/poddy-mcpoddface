@@ -78,7 +78,7 @@ export const RouterProgres: React.FC<RouterProgresProps> = ({
     }
 
     return () => clearTimeout(timeoutId);
-  }, [routerState, progressBarCurrentStep]);
+  }, [routerState, progressBarSteps, progressBarCurrentStep]);
 
   useEffect(() => {
     const handleStart = (url: string) => {
@@ -89,7 +89,6 @@ export const RouterProgres: React.FC<RouterProgresProps> = ({
     };
     const handleError = (url: string) => {
       setRouterState("error");
-      console.log("some")
     };
 
     router.events.on("routeChangeStart", handleStart);
@@ -99,7 +98,7 @@ export const RouterProgres: React.FC<RouterProgresProps> = ({
     return () => {
       router.events.off("routeChangeStart", handleStart);
       router.events.off("routeChangeComplete", handleStop);
-      router.events.off("routeChangeError", handleStop);
+      router.events.off("routeChangeError", handleError);
     };
   }, [router]);
 
@@ -107,7 +106,7 @@ export const RouterProgres: React.FC<RouterProgresProps> = ({
     <div ref={loaderWrapper} className="h-0.5 w-full bg-transparent">
       <div
         ref={loaderProgress}
-        className={`${_className} h-full bg-white rounded-r-md transition-all duration-700`}
+        className={`${_className} h-full bg-green-500 dark:bg-white rounded-r-md transition-all duration-700`}
       ></div>
       {/*
       TODO: Put buttons behind a feature flag

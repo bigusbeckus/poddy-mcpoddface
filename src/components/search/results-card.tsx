@@ -101,12 +101,12 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
           placeholder="Search"
           value={terms}
           onChange={handleInputChange}
-          className={`px-3 py-2 w-96 placeholder-black/70 dark:placeholder-white/50 text-lg rounded-l-lg  backdrop-blur-sm bg-black/20 dark:bg-white/10 outline-none border-transparent border-solid border-2 border-r-1 transition focus:border-y-black/30 dark:focus:border-y-white/10 border-r-black/30 dark:border-r-white/5 dark:focus:border-x-white/10 duration-150`}
+          className={`px-3 py-2 w-96 placeholder-black/70 dark:placeholder-white/50 text-lg rounded-l-lg  backdrop-blur-sm bg-black/20 dark:bg-white/10 outline-none border-transparent border-solid border-2 border-r-1 transition focus:border-y-black/30 dark:focus:border-y-white/10 border-r-black/30 dark:border-r-white/5 focus:border-x-black/30 dark:focus:border-x-white/10 duration-150`}
           onFocus={handleSearchFieldFocus}
           onBlur={handleSearchFieldFocus}
         />
         <button
-          className={`pl-2 pr-3 rounded-r-lg backdrop-blur-sm bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 dark:active:bg-white/30 transition-colors border-transparent border-solid border-2 border-l-0 flex flex-col justify-center ${
+          className={`pl-2 pr-3 rounded-r-lg backdrop-blur-sm bg-black/20 hover:bg-black/30 dark:bg-white/10 dark:hover:bg-white/20 dark:active:bg-white/30 transition-colors border-transparent border-solid border-2 border-l-0 flex flex-col justify-center ${
             isSearchInputFocused
               ? "border-r-black/30 border-y-black/30 dark:border-r-white/10 dark:border-y-white/10"
               : ""
@@ -127,7 +127,7 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
             showSearchCard() ? "" : "opacity-0"
           } transition-opacity`}
         >
-          <div className="px-2 py-2 bg-white/20 border-solid border-1 border-white/40 rounded-md max-h-96 overflow-y-scroll">
+          <div className="px-2 py-2 bg-black/20 dark:bg-white/20 border-solid border-1 border-black/40 dark:border-white/40 rounded-md max-h-96 overflow-y-scroll">
             <div className="w-[26rem]">
               {showSearchCard() &&
                 (isInitialLoading ? (
@@ -156,7 +156,7 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
                   )
                 ) : recentSearches.length > 0 ? (
                   <div className="">
-                    <div className="px-2 pt-1 py-2 text-sm text-white/50">
+                    <div className="px-2 pt-1 py-2 text-sm text-black/50 dark:text-white/50">
                       Recent searches
                     </div>
                     {recentSearches.map((item) => (
@@ -171,9 +171,9 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
                       </Link>
                       // <div key={item.searchTerm}>{item.searchTerm}</div>
                     ))}
-                    <div className="flex justify-end pb-1">
+                    <div className="flex justify-end pt-2 pb-1">
                       <button
-                        className="text-xs text-green-400 hover:text-green-500 font-bold"
+                        className="text-xs text-green-700 hover:text-green-900 dark:text-green-400 dark:hover:text-green-500 font-bold"
                         onClick={() => clearRecentSearches()}
                       >
                         Clear recents
