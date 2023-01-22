@@ -1,4 +1,4 @@
-import { RecentSearchItem } from "../../hooks/recent-searches";
+import { RecentSearchItem } from "hooks/recent-searches";
 import { RotateCcw } from "react-feather";
 
 type RecentSearchItemCardProps = {

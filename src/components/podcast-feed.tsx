@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { podcastFeedLink } from "../libs/itunes-podcast";
-import { PodcastThumb } from "./podcast-thumb";
+import { podcastFeedLink } from "libs/itunes-podcast";
+import { PodcastThumb } from "components/podcast-thumb";
 
 export const PodcastFeed: React.FC = () => {
   const feedLink = podcastFeedLink();

@@ -2,9 +2,9 @@
 // import { Modal } from "./modal";
 import Link from "next/link";
 import React from "react";
-import { PodcastSearchResult } from "../libs/itunes-podcast";
-import { FetchedImage } from "./image";
-import { PodcastThumb } from "./podcast-thumb";
+import { PodcastSearchResult } from "libs/itunes-podcast";
+import { FetchedImage } from "components/image";
+import { PodcastThumb } from "components/podcast-thumb";
 
 type PodcastListProps = {
   podcasts: PodcastSearchResult[];
@@ -72,7 +72,7 @@ export const PodcastList: React.FC<PodcastListProps> = ({ podcasts, view }) => {
                 <FetchedImage
                   src={result.artworkUrl600}
                   alt={`${result.collectionName} artwork`}
-                  className="h-full aspect-square overflow-hidden rounded-md col-auto"
+                  imgClassName="h-full aspect-square overflow-hidden rounded-md col-auto"
                 />
                 <div className="p-2">
                   <h3 className="text-xl font-extrabold">

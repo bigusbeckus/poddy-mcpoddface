@@ -1,5 +1,5 @@
 import { atom, useAtom } from "jotai";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 
 const PREFERS_DARK_MEDIA_QUERY = "(prefers-color-scheme: dark)";
 

@@ -1,4 +1,4 @@
-import { ProgressCircular } from "./progress/progress-circular";
+import { ProgressCircular } from "components/progress/progress-circular";
 
 export const Loading: React.FC = () => {
   return (

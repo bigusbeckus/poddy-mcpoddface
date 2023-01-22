@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FetchedImage } from "./image";
+import { FetchedImage } from "components/image";
 
 type PodcastThumbProps = {
   id: number;
@@ -16,16 +16,18 @@ export const PodcastThumb: React.FC<PodcastThumbProps> = ({
     <Link
       href={{
         pathname: `/podcast/${id}`,
-      }}>
+      }}
+    >
       <div
         key={id}
         // onClick={() => handleItemClick(result)}
-        className="hover:bg-background_light/20 hover:dark:bg-background_dark/20 p-1 cursor-pointer rounded-md transition duration-100">
+        className="hover:bg-background_light/20 hover:dark:bg-background_dark/20 p-1 cursor-pointer rounded-md transition duration-100"
+      >
         {/* <img src={result.artworkUrl600} className="w-full rounded-md aspect-square object-cover" /> */}
         <FetchedImage
           src={artworkUrl}
           alt={`${name} artwork`}
-          className="w-full rounded-md aspect-square overflow-hidden"
+          imgClassName="w-full rounded-md aspect-square overflow-hidden"
         />
         <div className="mt-2 leading-tight text-center text-ellipsis line-clamp-1">
           {name}

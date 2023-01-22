@@ -1,7 +1,7 @@
 import { Listbox } from "@headlessui/react";
 import React from "react";
 import { Monitor, Moon, Sun } from "react-feather";
-import { AppThemeMode, useTheme } from "../hooks/theme";
+import { AppThemeMode, useTheme } from "hooks/theme";
 
 const themes: AppThemeMode[] = ["system", "dark", "light"];
 

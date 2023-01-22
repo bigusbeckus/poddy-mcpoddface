@@ -1,6 +1,6 @@
-import "../styles/globals.css";
+import "styles/globals.css";
 import type { AppProps } from "next/app";
-import { NextPageWithRootLayout, RootLayout } from "../layouts/root";
+import { NextPageWithRootLayout, RootLayout } from "layouts/root";
 import { useState } from "react";
 import {
   DehydratedState,
@@ -8,7 +8,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { useSystemThemeChangeListener } from "../hooks/theme";
+import { useSystemThemeChangeListener } from "hooks/theme";
 
 type AppPropsWithRootLayout = AppProps<{
   dehydratedState?: DehydratedState;

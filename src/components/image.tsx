@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { FC, ReactNode, useState } from "react";
-import { ProgressCircular } from "./progress/progress-circular";
+import { ProgressCircular } from "components/progress/progress-circular";
 
 type ImageProps = {
   src: string;

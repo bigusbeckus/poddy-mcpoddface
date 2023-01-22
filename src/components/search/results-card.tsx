@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { ChangeEvent, FocusEvent, FormEvent, useState } from "react";
 import { Search } from "react-feather";
-import { useDebounce } from "../../hooks/debounce";
-import { useRecentSearches } from "../../hooks/recent-searches";
-import { podcastSearchLink } from "../../libs/itunes-podcast";
-import { ProgressCircular } from "../progress/progress-circular";
+import { useDebounce } from "hooks/debounce";
+import { useRecentSearches } from "hooks/recent-searches";
+import { podcastSearchLink } from "libs/itunes-podcast";
+import { ProgressCircular } from "components/progress/progress-circular";
 import { RecentSearchItemCard } from "./recent-item";
 import { SearchResultItem } from "./results-item";
 

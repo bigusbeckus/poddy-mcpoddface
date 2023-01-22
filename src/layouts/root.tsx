@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { NextPage } from "next/types";
 import { ReactElement, ReactNode } from "react";
-import { RouterProgres } from "../components/router-progress";
+import { RouterProgres } from "components/router-progress";
 
 type RootLayoutProps = {
   children?: React.ReactNode;

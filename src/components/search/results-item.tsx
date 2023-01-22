@@ -1,6 +1,6 @@
 import React from "react";
-import { PodcastSearchResult } from "../../libs/itunes-podcast";
-import { FetchedImage } from "../image";
+import { PodcastSearchResult } from "libs/itunes-podcast";
+import { FetchedImage } from "components/image";
 
 type SearchResultItemProps = {
   result: PodcastSearchResult;
