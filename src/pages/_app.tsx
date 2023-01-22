@@ -9,6 +9,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { useSystemThemeChangeListener } from "hooks/theme";
+import { AnimatePresence } from "framer-motion";
 
 type AppPropsWithRootLayout = AppProps<{
   dehydratedState?: DehydratedState;
@@ -16,7 +17,7 @@ type AppPropsWithRootLayout = AppProps<{
   Component: NextPageWithRootLayout;
 };
 
-function MyApp({ Component, pageProps }: AppPropsWithRootLayout) {
+function MyApp({ Component, pageProps, router }: AppPropsWithRootLayout) {
   useSystemThemeChangeListener();
 
   const [queryClient] = useState(
@@ -35,7 +36,11 @@ function MyApp({ Component, pageProps }: AppPropsWithRootLayout) {
     <RootLayout>
       <QueryClientProvider client={queryClient}>
         <Hydrate state={pageProps.dehydratedState}>
-          {getLayout(<Component {...pageProps} />)}
+          {getLayout(
+            <AnimatePresence mode="wait" initial={false}>
+              <Component {...pageProps} key={router.asPath} />
+            </AnimatePresence>
+          )}
         </Hydrate>
       </QueryClientProvider>
     </RootLayout>

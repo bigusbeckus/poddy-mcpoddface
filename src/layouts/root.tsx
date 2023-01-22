@@ -24,14 +24,10 @@ export const RootLayout: React.FC<RootLayoutProps> = ({
         <meta name="description" content={description ?? defaultDescription} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {/* <ThemeContext.Provider value={[darkMode, setDarkMode]}> */}
-      {/* <div className={"h-full" + (darkMode ? " dark" : "")}> */}
       <div className="h-full overflow-hidden dark:bg-black/40 dark:text-inherit bg-white text-black dark:text-white">
         <RouterProgres />
         {children}
-        {/* </div> */}
       </div>
-      {/* </ThemeContext.Provider> */}
     </>
   );
 };

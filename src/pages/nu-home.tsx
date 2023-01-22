@@ -3,6 +3,7 @@ import { NextPage } from "next";
 import { useState } from "react";
 import { SearchResultsCard } from "components/search/results-card";
 import { DefaultFooter } from "components/footer";
+import { AnimatedLayout } from "layouts/animated";
 
 const NuHome: NextPage = () => {
   const [searchCardShown, setSearchCardShown] = useState(false);
@@ -12,7 +13,7 @@ const NuHome: NextPage = () => {
   };
 
   return (
-    <>
+    <AnimatedLayout>
       <div className="h-full overflow-y-scroll bg-[url('../data/slanted-thumbs-gradient.png')] bg-cover bg-no-repeat bg-blend-color-burn">
         <div className="h-full bg-green-50/50 dark:bg-black/70 transition-colors flex flex-col">
           <header className="py-6 px-8">
@@ -71,7 +72,7 @@ const NuHome: NextPage = () => {
           <DefaultFooter />
         </div>
       </div>
-    </>
+    </AnimatedLayout>
   );
 };
 
