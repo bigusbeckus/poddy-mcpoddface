@@ -51,7 +51,7 @@ export default async function handler(
     // Respond if entry is found and is not stale
     if (
       dbResponse &&
-      differenceInHours(new Date(), dbResponse.createdAt) < 12
+      differenceInHours(new Date(), dbResponse.createdAt) < 24
     ) {
       return res.status(200).send(dbResponse);
     }
@@ -106,23 +106,27 @@ export default async function handler(
       itunesContentAdvisoryRating: fetchedPodcast.contentAdvisoryRating,
       itunesGenreIds: fetchedPodcast.genreIds,
       itunesGenres: lookupResponse.genres,
-      feedTitle: channel.title,
-      feedDescription: channel.description,
-      feedItunesImage: channel["itunes:image"]["@_href"],
-      feedLanguage: channel["language"],
+      feedTitle: channel.title.toString(),
+      feedDescription: channel.description.toString(),
+      feedItunesImage: channel["itunes:image"]["@_href"].toString(),
+      feedLanguage: channel["language"].toString(),
       feedItunesExplicit: channel["itunes:explicit"] === "yes",
-      feedItunesAuthor: channel["itunes:author"],
+      feedItunesAuthor: channel["itunes:author"]?.toString(),
       feedItunesType:
         channel["itunes:type"] === "serial"
           ? iTunesType.SERIAL
           : channel["itunes:type"] === "episodic"
           ? iTunesType.EPISODIC
           : undefined,
-      feedCopyright: channel["copyright"],
-      feedNewUrl: channel["itunes:new-feed-url"],
+      feedCopyright: channel["copyright"]?.toString(),
+      feedNewUrl: channel["itunes:new-feed-url"]?.toString(),
       feedComplete: channel["itunes:complete"] === "yes",
-      feedOwnerName: channel["itunes:owner"]["itunes:name"],
-      feedOwnerEmail: channel["itunes:owner"]["itunes:email"],
+      feedOwnerName: channel["itunes:owner"]
+        ? channel["itunes:owner"]["itunes:name"]?.toString()
+        : undefined,
+      feedOwnerEmail: channel["itunes:owner"]
+        ? channel["itunes:owner"]["itunes:email"]?.toString()
+        : undefined,
     };
 
     const episodeData: Omit<Prisma.EpisodeCreateInput, "Podcast">[] = [];
@@ -154,11 +158,11 @@ export default async function handler(
               new Date()
             )
           : undefined,
-        description: item["description"],
+        description: item["description"]?.toString(),
         itunesDuration: durationIsNum
           ? parseInt(item["itunes:duration"])
           : parseDurationSeconds(item["itunes:duration"]),
-        link: item["link"],
+        link: item["link"]?.toString(),
         itunesImage: item["itunes:image"]
           ? item["itunes:image"]["@_href"]
           : undefined,
@@ -280,9 +284,9 @@ export default async function handler(
 
     return res.status(200).send(podcast);
   } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      message: "iTunes lookup failed",
+    console.error(error);
+    return res.status(400).json({
+      message: "Podcast lookup failed",
       error: error ? error : "LOOKUP_ERROR",
     });
   }
