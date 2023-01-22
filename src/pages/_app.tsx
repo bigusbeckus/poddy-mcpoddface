@@ -8,6 +8,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
+import { useSystemThemeChangeListener } from "../hooks/theme";
 
 type AppPropsWithRootLayout = AppProps<{
   dehydratedState?: DehydratedState;
@@ -16,6 +17,8 @@ type AppPropsWithRootLayout = AppProps<{
 };
 
 function MyApp({ Component, pageProps }: AppPropsWithRootLayout) {
+  useSystemThemeChangeListener();
+
   const [queryClient] = useState(
     () =>
       new QueryClient({

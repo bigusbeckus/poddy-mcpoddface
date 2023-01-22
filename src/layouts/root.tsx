@@ -2,8 +2,6 @@ import Head from "next/head";
 import { NextPage } from "next/types";
 import { ReactElement, ReactNode } from "react";
 import { RouterProgres } from "../components/router-progress";
-import { ThemeContext, useThemeContextState } from "../context/theme";
-import { useTheme } from "../hooks/theme";
 
 type RootLayoutProps = {
   children?: React.ReactNode;
@@ -19,9 +17,6 @@ export const RootLayout: React.FC<RootLayoutProps> = ({
   title,
   description,
 }) => {
-  // const [darkMode, setDarkMode] = useThemeContextState(true);
-  const [darkMode, setDarkMode] = useTheme();
-
   return (
     <>
       <Head>
