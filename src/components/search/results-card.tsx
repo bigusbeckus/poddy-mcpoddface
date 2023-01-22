@@ -46,8 +46,10 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
 
   function handleSearchSubmit(e: FormEvent) {
     e.preventDefault();
-    addToRecentSearches(terms);
-    router.push(`/search/?query=${encodeURI(terms)}`);
+    if (terms.trim()) {
+      addToRecentSearches(terms);
+      router.push(`/search/?query=${encodeURI(terms)}`);
+    }
   }
 
   function handleInputChange(e: ChangeEvent<HTMLInputElement>) {
@@ -115,7 +117,7 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
         >
           <Search
             size={20}
-            className={`inline-block transition duration-150 ${
+            className={`inline-block stroke-black dark:stroke-white transition duration-150 ${
               isSearchInputFocused ? "opacity-100" : "opacity-50"
             }`}
           />
