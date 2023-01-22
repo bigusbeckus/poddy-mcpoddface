@@ -1,9 +1,9 @@
 import { Episode, iTunesCategory } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 // import { GetServerSideProps } from "next";
-import { getFeed, PodcastSearchResult } from "../libs/itunes-podcast";
-import { FetchedImage } from "./image";
-import { PodcastDescription } from "./podcast-description";
+import { getFeed, PodcastSearchResult } from "libs/itunes-podcast";
+import { FetchedImage } from "components/image";
+import { PodcastDescription } from "components/podcast-description";
 
 type PodcastDetailsProps = {
   podcast: PodcastSearchResult;
@@ -79,7 +79,8 @@ export const PodcastDetails: React.FC<PodcastDetailsProps> = ({ podcast }) => {
             {data.feedItunesCategories?.map((category: iTunesCategory) => (
               <span
                 key={category.id}
-                className="py-1 px-2 text-sm font-bold rounded-xl dark:bg-white/20 bg-black/20">
+                className="py-1 px-2 text-sm font-bold rounded-xl dark:bg-white/20 bg-black/20"
+              >
                 {category.text}
               </span>
             ))}
@@ -91,13 +92,14 @@ export const PodcastDetails: React.FC<PodcastDetailsProps> = ({ podcast }) => {
           {data.episodes.map((episode: Episode) => (
             <div
               key={episode.id}
-              className="p-2 rounded-md bg-black/20 dark:bg-white/20">
+              className="p-2 rounded-md bg-black/20 dark:bg-white/20"
+            >
               <div className="flex h-32">
                 <div className="w-32 shrink-0 grow-0">
                   <FetchedImage
                     src={episode.itunesImage ?? data.itunesArtworkUrl600}
                     alt={`${episode.title} thumbnail`}
-                    className="w-full"
+                    imgClassName="w-full"
                     fill
                   />
                 </div>
