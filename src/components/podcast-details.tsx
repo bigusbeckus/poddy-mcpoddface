@@ -1,12 +1,12 @@
 import { Episode, iTunesCategory } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 // import { GetServerSideProps } from "next";
-import { getFeed, PodcastResult } from "../libs/itunes-podcast";
-import { FetchedImage } from "./image";
-import { PodcastDescription } from "./podcast-description";
+import { getFeed, PodcastSearchResult } from "libs/itunes-podcast";
+import { FetchedImage } from "components/image";
+import { PodcastDescription } from "components/podcast-description";
 
 type PodcastDetailsProps = {
-  podcast: PodcastResult;
+  podcast: PodcastSearchResult;
 };
 
 // export const getServerSideProps: GetServerSideProps = async ({params}) {
@@ -66,38 +66,40 @@ export const PodcastDetails: React.FC<PodcastDetailsProps> = ({ podcast }) => {
 
   return (
     <>
-      <h1 className="text-5xl">{data.feedTitle}</h1>
-      <div className="flex mb-10">
+      <div className="flex">
         {/* Thumbnail and details */}
-        <div className="shrink w-96 py-8">
+        <div className="shrink w-96 sticky top-24 flex-align-start">
           <FetchedImage
             src={data.itunesArtworkUrl600}
             alt={`${data.feedTitle} thumbnail`}
-            className=""
+            imgClassName="rounded-md"
           />
+          <h1 className="text-3xl text-center py-4">{data.feedTitle}</h1>
           <div className="py-2 flex flex-wrap justify-center gap-2">
             {data.feedItunesCategories?.map((category: iTunesCategory) => (
               <span
                 key={category.id}
-                className="py-1 px-2 text-sm font-bold rounded-xl dark:bg-white/20 bg-black/20">
+                className="py-1 px-2 text-sm font-bold rounded-xl dark:bg-white/20 bg-black/20"
+              >
                 {category.text}
               </span>
             ))}
           </div>
         </div>
         {/* Episodes */}
-        <div className="grow w-96 pl-16 py-8 grid grid-cols-1 gap-3">
+        <div className="grow w-96 pl-16 grid grid-cols-1 gap-3">
           {/* <h1 className="text-3xl">Episodes</h1> */}
           {data.episodes.map((episode: Episode) => (
             <div
               key={episode.id}
-              className="p-2 rounded-md bg-black/20 dark:bg-white/20">
+              className="p-2 rounded-md bg-black/20 dark:bg-white/20"
+            >
               <div className="flex h-32">
                 <div className="w-32 shrink-0 grow-0">
                   <FetchedImage
                     src={episode.itunesImage ?? data.itunesArtworkUrl600}
                     alt={`${episode.title} thumbnail`}
-                    className="w-full"
+                    imgClassName="w-full"
                     fill
                   />
                 </div>

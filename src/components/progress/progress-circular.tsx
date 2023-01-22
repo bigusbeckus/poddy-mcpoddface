@@ -1,16 +1,18 @@
-import { FC, useMemo } from "react";
-
-type ProgressProps = {
-  percent: number;
-};
-
-export const ProgressCircular: FC<{
+type ProgressCircularProps = {
   percent?: number;
   thickness?: number;
-}> = ({ percent, thickness }) => {
+  className?: string;
+};
+
+export const ProgressCircular: React.FC<ProgressCircularProps> = ({
+  percent,
+  thickness,
+  className,
+}) => {
   const _percent = percent ?? 80;
   const _thickness = thickness ?? 20;
 
+  // TODO: Look into useMemo for this bit
   // const vBoxDimension = 100;
   const circleDimension = 50; // vBoxDimension / 2;
   const strokeWidth = circleDimension * (_thickness / 100);
@@ -24,7 +26,10 @@ export const ProgressCircular: FC<{
           xmlns="http://www.w3.org/2000/svg"
           width={30}
           height={30}
-          className="-rotate-90 w-full h-full stroke-indigo-900">
+          className={`-rotate-90 w-full h-full ${
+            className ? className : "stroke-green-600"
+          }`}
+        >
           <circle
             cx={circleDimension}
             cy={circleDimension}

@@ -4,7 +4,7 @@ import { prisma } from "../../../server/db/client";
 import { ITUNES_PODCAST_LOOKUP_LINK } from "../../../libs/itunes-podcast";
 import { XMLParser } from "fast-xml-parser";
 import { iTunesType, Prisma } from "@prisma/client";
-import { parse } from "date-fns";
+import { differenceInHours, parse } from "date-fns";
 import { EPISODE_FETCH_LIMIT } from "../../../server/constants/limits";
 import { EPISODE_DEFAULT_ORDER_BY } from "../../../server/constants/order";
 import { parseDurationSeconds } from "../../../libs/util/converters";
@@ -47,10 +47,16 @@ export default async function handler(
         feedItunesCategories: true,
       },
     });
-    if (dbResponse) {
+
+    // Respond if entry is found and is not stale
+    if (
+      dbResponse &&
+      differenceInHours(new Date(), dbResponse.createdAt) < 24
+    ) {
       return res.status(200).send(dbResponse);
     }
-    // Lookup podcast (db entry not found)
+
+    // Lookup podcast if db entry hasn't been found or is stale
     const lookupResponse = (
       await axios.get(`${ITUNES_PODCAST_LOOKUP_LINK}&id=${id}`)
     ).data;
@@ -77,6 +83,7 @@ export default async function handler(
 
     // Cache podcast data
     const podcastData: Prisma.PodcastCreateInput = {
+      id: dbResponse ? dbResponse.id : undefined,
       itunesWrapperType: fetchedPodcast.wrapperType,
       itunesKind: fetchedPodcast.kind,
       itunesArtistId: fetchedPodcast.artistId,
@@ -99,23 +106,27 @@ export default async function handler(
       itunesContentAdvisoryRating: fetchedPodcast.contentAdvisoryRating,
       itunesGenreIds: fetchedPodcast.genreIds,
       itunesGenres: lookupResponse.genres,
-      feedTitle: channel.title,
-      feedDescription: channel.description,
-      feedItunesImage: channel["itunes:image"]["@_href"],
-      feedLanguage: channel["language"],
+      feedTitle: channel.title.toString(),
+      feedDescription: channel.description.toString(),
+      feedItunesImage: channel["itunes:image"]["@_href"].toString(),
+      feedLanguage: channel["language"].toString(),
       feedItunesExplicit: channel["itunes:explicit"] === "yes",
-      feedItunesAuthor: channel["itunes:author"],
+      feedItunesAuthor: channel["itunes:author"]?.toString(),
       feedItunesType:
         channel["itunes:type"] === "serial"
           ? iTunesType.SERIAL
           : channel["itunes:type"] === "episodic"
           ? iTunesType.EPISODIC
           : undefined,
-      feedCopyright: channel["copyright"],
-      feedNewUrl: channel["itunes:new-feed-url"],
+      feedCopyright: channel["copyright"]?.toString(),
+      feedNewUrl: channel["itunes:new-feed-url"]?.toString(),
       feedComplete: channel["itunes:complete"] === "yes",
-      feedOwnerName: channel["itunes:owner"]["itunes:name"],
-      feedOwnerEmail: channel["itunes:owner"]["itunes:email"],
+      feedOwnerName: channel["itunes:owner"]
+        ? channel["itunes:owner"]["itunes:name"]?.toString()
+        : undefined,
+      feedOwnerEmail: channel["itunes:owner"]
+        ? channel["itunes:owner"]["itunes:email"]?.toString()
+        : undefined,
     };
 
     const episodeData: Omit<Prisma.EpisodeCreateInput, "Podcast">[] = [];
@@ -147,11 +158,11 @@ export default async function handler(
               new Date()
             )
           : undefined,
-        description: item["description"],
+        description: item["description"]?.toString(),
         itunesDuration: durationIsNum
           ? parseInt(item["itunes:duration"])
           : parseDurationSeconds(item["itunes:duration"]),
-        link: item["link"],
+        link: item["link"]?.toString(),
         itunesImage: item["itunes:image"]
           ? item["itunes:image"]["@_href"]
           : undefined,
@@ -232,10 +243,28 @@ export default async function handler(
       update: {
         ...podcastData,
         episodes: {
-          createMany: {
-            data: episodeData,
-            // skipDuplicates: true,
-          },
+          // createMany: {
+          //   data: episodeData,
+          //   // skipDuplicates: true,
+          // },
+          // connectOrCreate: episodeData,
+          // upsert: {
+          //   create: episodeData,
+          //   update: episodeData,
+          //   where: {
+          //     guid: episodeData.g
+          //   }
+          // }
+          upsert: episodeData.map(
+            (episode) =>
+              ({
+                create: episode,
+                update: episode as Prisma.EpisodeUpdateInput,
+                where: {
+                  guid: episode.guid,
+                },
+              } as Prisma.EpisodeUpsertWithWhereUniqueWithoutPodcastInput)
+          ),
         },
         feedItunesCategories: {
           connectOrCreate: feedCategories,
@@ -252,17 +281,12 @@ export default async function handler(
         feedItunesCategories: true,
       },
     });
-    if (podcast) {
-      res.status(200).send(podcast);
-    } else {
-      res.status(500).json({
-        message: "Server error: Unable to cache podcast",
-      });
-    }
+
+    return res.status(200).send(podcast);
   } catch (error) {
-    console.log(error);
-    res.status(400).json({
-      message: "iTunes lookup failed",
+    console.error(error);
+    return res.status(400).json({
+      message: "Podcast lookup failed",
       error: error ? error : "LOOKUP_ERROR",
     });
   }

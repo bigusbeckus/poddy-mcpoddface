@@ -1,21 +1,15 @@
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { ReactElement } from "react";
-import { HomeLayout } from "../../layouts/home";
+import { HomeLayout } from "layouts/home";
 import {
   getFeed,
   lookupPodcast,
-  PodcastResult,
+  PodcastSearchResult,
   SearchReturn,
 } from "../../libs/itunes-podcast";
-import { NextPageWithRootLayout } from "../_app";
-import NextError from "next/error";
-import Link from "next/link";
-import {
-  GetServerSideProps,
-  InferGetServerSidePropsType,
-  NextPageContext,
-} from "next";
+import { NextPageWithRootLayout } from "layouts/root";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { PodcastDetails } from "../../components/podcast-details";
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
@@ -41,7 +35,6 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
 const SelectedPodcastPage: NextPageWithRootLayout = ({
   collectionId,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const router = useRouter();
   // const { collectionId } = router.query;
 
   // if (!collectionId || collectionId instanceof Array) {
@@ -108,12 +101,12 @@ const SelectedPodcastPage: NextPageWithRootLayout = ({
   // });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="p-8">Loading...</div>;
   }
 
   if (error) {
     return (
-      <div>
+      <div className="p-8">
         Error:{" "}
         {error instanceof Error
           ? error.message

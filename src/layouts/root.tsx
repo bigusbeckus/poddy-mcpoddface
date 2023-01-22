@@ -1,6 +1,7 @@
 import Head from "next/head";
-import React from "react";
-import { ThemeContext, useThemeContextState } from "../context/theme";
+import { NextPage } from "next/types";
+import { ReactElement, ReactNode } from "react";
+import { RouterProgres } from "components/router-progress";
 
 type RootLayoutProps = {
   children?: React.ReactNode;
@@ -16,8 +17,6 @@ export const RootLayout: React.FC<RootLayoutProps> = ({
   title,
   description,
 }) => {
-  const [darkMode, setDarkMode] = useThemeContextState(true);
-
   return (
     <>
       <Head>
@@ -25,13 +24,17 @@ export const RootLayout: React.FC<RootLayoutProps> = ({
         <meta name="description" content={description ?? defaultDescription} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <ThemeContext.Provider value={[darkMode, setDarkMode]}>
-        {/* <div className={"h-full" + (darkMode ? " dark" : "")}> */}
-        <div className="bg-primary_light-300 dark:bg-primary_dark-900 dark:text-white h-full overflow-y-scroll">
-          {children}
-          {/* </div> */}
-        </div>
-      </ThemeContext.Provider>
+      <div className="h-full overflow-hidden dark:bg-black/40 dark:text-inherit bg-white text-black dark:text-white">
+        <RouterProgres />
+        {children}
+      </div>
     </>
   );
+};
+
+export type NextPageWithRootLayout<
+  P = Record<string, unknown>,
+  IP = P
+> = NextPage<P, IP> & {
+  getLayout?: (page: ReactElement) => ReactNode;
 };

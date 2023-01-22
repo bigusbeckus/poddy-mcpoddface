@@ -1,21 +1,15 @@
-import "../styles/globals.css";
+import "styles/globals.css";
 import type { AppProps } from "next/app";
-import { RootLayout } from "../layouts/root";
-import { NextPage } from "next";
-import { ReactElement, ReactNode, useState } from "react";
+import { NextPageWithRootLayout, RootLayout } from "layouts/root";
+import { useState } from "react";
 import {
   DehydratedState,
   Hydrate,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-
-export type NextPageWithRootLayout<
-  P = Record<string, unknown>,
-  IP = P
-> = NextPage<P, IP> & {
-  getLayout?: (page: ReactElement) => ReactNode;
-};
+import { useSystemThemeChangeListener } from "hooks/theme";
+import { AnimatePresence } from "framer-motion";
 
 type AppPropsWithRootLayout = AppProps<{
   dehydratedState?: DehydratedState;
@@ -23,7 +17,9 @@ type AppPropsWithRootLayout = AppProps<{
   Component: NextPageWithRootLayout;
 };
 
-function MyApp({ Component, pageProps }: AppPropsWithRootLayout) {
+function MyApp({ Component, pageProps, router }: AppPropsWithRootLayout) {
+  useSystemThemeChangeListener();
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -40,7 +36,11 @@ function MyApp({ Component, pageProps }: AppPropsWithRootLayout) {
     <RootLayout>
       <QueryClientProvider client={queryClient}>
         <Hydrate state={pageProps.dehydratedState}>
-          {getLayout(<Component {...pageProps} />)}
+          {getLayout(
+            <AnimatePresence mode="wait" initial={false}>
+              <Component {...pageProps} key={router.asPath} />
+            </AnimatePresence>
+          )}
         </Hydrate>
       </QueryClientProvider>
     </RootLayout>
