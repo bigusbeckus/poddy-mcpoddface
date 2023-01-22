@@ -1,79 +1,79 @@
-import { useQuery } from "@tanstack/react-query";
-import { ChangeEvent, ReactElement, useState } from "react";
-import { TextField } from "../components/input/text-field";
-import { Loading } from "../components/loading";
-import { PodcastList } from "../components/podcast-list";
-import { useDebounce } from "../hooks/debounce";
-import { HomeLayout } from "../layouts/home";
-import { podcastSearchLink } from "../libs/itunes-podcast";
-import { NextPageWithRootLayout } from "./_app";
+import Link from "next/link";
+import { NextPage } from "next";
+import { useState } from "react";
+import { SearchResultsCard } from "components/search/results-card";
+import { DefaultFooter } from "components/footer";
+import { AnimatedLayout } from "layouts/animated";
 
-const Home: NextPageWithRootLayout = () => {
-  const [terms, setTerms] = useState("");
+const NuHome: NextPage = () => {
+  const [searchCardShown, setSearchCardShown] = useState(false);
 
-  const searchLink = podcastSearchLink().term(terms);
-
-  const { data, error, isFetching, refetch } = useQuery(
-    ["podcasts"],
-    searchLink.fetch
-  );
-  const debouncedRefetch = useDebounce(refetch);
-
-  function handleTermsInput(event: ChangeEvent<HTMLInputElement>) {
-    setTerms(event.target.value);
-    debouncedRefetch();
-  }
+  const handleSearchVisibility = (eventType: string) => {
+    setSearchCardShown(eventType === "focus");
+  };
 
   return (
-    <div className={`h-full px-8`}>
-      <div className={`fixed top-0 w-full ${terms ? "" : "h-100"}`}>
-        <div
-          className={`transition-all duration-500 overflow-hidden flex flex-col justify-end ${
-            terms ? "h-0 opacity-0" : "h-half-screen pb-8"
-          }`}>
-          <h1 className={`text-6xl text-center font-extrabold`}>
-            Podcasts Everywhere
-          </h1>
-        </div>
-        <div
-          className={`transition duration-100 flex justify-center text-xl w-full z-10 ${
-            terms ? "py-2" : ""
-          }`}>
-          <TextField
-            value={terms}
-            onChange={handleTermsInput}
-            placeholder="Search"
-            className={terms ? "scale-90" : ""}
-          />
+    <AnimatedLayout>
+      <div className="h-full overflow-y-scroll bg-[url('../data/slanted-thumbs-gradient.png')] bg-cover bg-no-repeat bg-blend-color-burn">
+        <div className="h-full bg-green-50/50 dark:bg-black/70 transition-colors flex flex-col">
+          <header className="py-6 px-8">
+            {/* Nav bar */}
+            <nav
+              className={`h-12 w-full align-middle flex flex-col justify-center`}
+            >
+              <div className="flex justify-between">
+                <div className="flex flex-col justify-center">
+                  <Link href="/">
+                    <div className="bg-gray-900 text-primary_light-300 dark:bg-white/50 dark:text-gray-900 py-0 px-2 rounded-sm font-black align-middle cursor-pointer">
+                      Poddy McPoddface
+                    </div>
+                  </Link>
+                </div>
+                <div className="flex flex-col justify-center">
+                  <div className="flex justify-end items-center gap-8">
+                    <Link href="/login">
+                      <a className="font-bold hover:text-black/80 dark:hover:text-gray-300 transition">
+                        Sign in
+                      </a>
+                    </Link>
+                    <Link href="/signup">
+                      <a className="font-bold bg-green-500 hover:bg-green-600 dark:bg-green-900 dark:hover:bg-green-800 px-4 py-2 rounded-lg transition duration-150">
+                        Create a new account
+                      </a>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </nav>
+          </header>
+          {/* Landing content */}
+          <div className="flex-grow">
+            <main
+              className={`flex flex-col justify-end h-half-screen max-h-[128rem] transition-all ease-out duration-300 ${
+                searchCardShown ? "pb-10 h-72" : ""
+              }`}
+            >
+              <div>
+                <h1 className="text-4xl font-extrabold dark:text-white/80 text-center">
+                  Listen Everywhere
+                </h1>
+                <h2 className="mt-1 text-lg dark:font-light dark:text-white/50 text-center">
+                  Podcast sync without the fuss
+                </h2>
+              </div>
+              <SearchResultsCard
+                className="mt-10"
+                onSearchCardShow={handleSearchVisibility}
+                onSearchCardHide={handleSearchVisibility}
+              />
+            </main>
+          </div>
+          {/* Footer */}
+          <DefaultFooter />
         </div>
       </div>
-      <div
-        className={`transition-all duration-500 w-full py-8 overflow-hidden ${
-          terms ? (isFetching ? "h-2/3" : "h-min") : "h-0 opacity-0"
-        }`}>
-        {terms ? (
-          isFetching ? (
-            <Loading />
-          ) : error ? (
-            <div>
-              Error:{" "}
-              {error instanceof Error
-                ? (error as Error).message
-                : "An error occured"}
-            </div>
-          ) : (
-            <PodcastList podcasts={data ? data.results : []} />
-          )
-        ) : (
-          <div></div>
-        )}
-      </div>
-    </div>
+    </AnimatedLayout>
   );
 };
 
-Home.getLayout = (page: ReactElement) => {
-  return <HomeLayout>{page}</HomeLayout>;
-};
-
-export default Home;
+export default NuHome;
