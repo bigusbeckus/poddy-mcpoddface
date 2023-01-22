@@ -1,5 +1,5 @@
-import { Listbox } from "@headlessui/react";
-import React from "react";
+import { Listbox, Transition } from "@headlessui/react";
+import React, { Fragment } from "react";
 import { Monitor, Moon, Sun } from "react-feather";
 import { AppThemeMode, useTheme } from "hooks/theme";
 
@@ -24,24 +24,34 @@ export const DefaultFooter: React.FC = () => {
       <div className="col-span-2 flex justify-end">
         <div className="w-40 relative">
           <Listbox value={theme.mode} onChange={handleThemeSelection}>
-            <Listbox.Options className="w-full absolute bottom-10 max-h-96 py-1 rounded-md bg-black/20 dark:bg-white/20 ring-1 ring-black dark:ring-white ring-opacity-30 dark:ring-opacity-30 focus:outline-none text-sm">
-              {themes.map((theme) => (
-                <Listbox.Option
-                  className={({ selected }) =>
-                    `px-3 py-2 rounded-md cursor-pointer transition-colors select-none ${
-                      selected
-                        ? "bg-black/20 dark:bg-white/20"
-                        : "hover:bg-black/10 hover:dark:bg-white/10"
-                    }`
-                  }
-                  key={theme}
-                  value={theme}
-                >
-                  <span className="capitalize">{theme}</span>
-                </Listbox.Option>
-              ))}
-            </Listbox.Options>
-            <Listbox.Button className="relative w-full px-3 py-2 rounded-md text-black dark:text-white bg-black/20 dark:bg-white/20">
+            <Transition
+              as={Fragment}
+              enter="transition ease-out"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="transition ease-out"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <Listbox.Options className="w-full absolute bottom-10 max-h-96 py-1 rounded-md bg-black/20 dark:bg-white/20 ring-1 ring-black dark:ring-white ring-opacity-30 dark:ring-opacity-30 focus:outline-none text-sm backdrop-blur-md">
+                {themes.map((theme) => (
+                  <Listbox.Option
+                    className={({ selected }) =>
+                      `px-3 py-2 rounded-md cursor-pointer transition-colors select-none ${
+                        selected
+                          ? "bg-black/20 dark:bg-white/20"
+                          : "hover:bg-black/10 hover:dark:bg-white/10"
+                      }`
+                    }
+                    key={theme}
+                    value={theme}
+                  >
+                    <span className="capitalize">{theme}</span>
+                  </Listbox.Option>
+                ))}
+              </Listbox.Options>
+            </Transition>
+            <Listbox.Button className="relative w-full px-3 py-2 rounded-md text-black dark:text-white bg-black/20 dark:bg-white/20 backdrop-blur-md">
               <div className="flex items-center gap-3">
                 <div>
                   <Monitor
