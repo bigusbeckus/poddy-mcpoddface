@@ -1,11 +1,11 @@
 import { Prisma } from "@prisma/client";
 import axios from "axios";
-import { clampInt } from "./util/number";
+import { clampInt } from "libs/util/number";
 
 export const ITUNES_PODCAST_SEARCH_LINK =
   "https://itunes.apple.com/search?media=podcast";
 export const ITUNES_PODCAST_LOOKUP_LINK =
-  "https://itunes.apple.com/lookup?&entity=podcast";
+  "https://itunes.apple.com/lookup?entity=podcast";
 export const ITUNES_RSS_FEED_LINK =
   "https://rss.applemarketingtools.com/api/v2";
 
