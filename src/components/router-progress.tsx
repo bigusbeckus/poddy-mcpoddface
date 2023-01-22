@@ -1,7 +1,21 @@
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
-import { randomFromRange } from "../libs/util/number";
-import { Button } from "./button";
+import { randomFromRange } from "libs/util/number";
+// import { Button } from "components/button";
+
+const progressBarSteps = [
+  "w-[0.3%]",
+  "w-[10%]",
+  "w-[20%]",
+  "w-[30%]",
+  "w-[40%]",
+  "w-[50%]",
+  "w-[60%]",
+  "w-[70%]",
+  "w-[80%]",
+  "w-[90%]",
+  "w-[95%]",
+];
 
 type RouterProgresProps = {
   className?: string;
@@ -20,19 +34,6 @@ export const RouterProgres: React.FC<RouterProgresProps> = ({
   const loaderWrapper = useRef<HTMLDivElement>(null);
   const loaderProgress = useRef<HTMLDivElement>(null);
 
-  const progressBarSteps = [
-    "w-[0.3%]",
-    "w-[10%]",
-    "w-[20%]",
-    "w-[30%]",
-    "w-[40%]",
-    "w-[50%]",
-    "w-[60%]",
-    "w-[70%]",
-    "w-[80%]",
-    "w-[90%]",
-    "w-[95%]",
-  ];
   const [progressBarCurrentStep, setProgressBarCurrentStep] = useState(0);
 
   let _className = className ? `${className} ` : "";
@@ -78,7 +79,7 @@ export const RouterProgres: React.FC<RouterProgresProps> = ({
     }
 
     return () => clearTimeout(timeoutId);
-  }, [routerState, progressBarSteps, progressBarCurrentStep]);
+  }, [routerState, progressBarCurrentStep]);
 
   useEffect(() => {
     const handleStart = (url: string) => {
