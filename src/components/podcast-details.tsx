@@ -72,7 +72,7 @@ export const PodcastDetails: React.FC<PodcastDetailsProps> = ({ podcast }) => {
           <FetchedImage
             src={data.itunesArtworkUrl600}
             alt={`${data.feedTitle} thumbnail`}
-            className="rounded-md"
+            imgClassName="rounded-md"
           />
           <h1 className="text-3xl text-center py-4">{data.feedTitle}</h1>
           <div className="py-2 flex flex-wrap justify-center gap-2">
