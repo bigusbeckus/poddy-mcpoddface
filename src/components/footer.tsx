@@ -1,9 +1,11 @@
 import React, { useContext } from "react";
 import { ThemeContext } from "../context/theme";
+import { useTheme } from "../hooks/theme";
 import { Toggle } from "./toggle";
 
 export const DefaultFooter: React.FC = () => {
-  const [darkMode, setDarkMode] = useContext(ThemeContext);
+  // const [darkMode, setDarkMode] = useContext(ThemeContext);
+  const [darkMode, setDarkMode] = useTheme();
 
   return (
     <div className="bottom-0 w-full py-6 px-8 grid grid-cols-12 items-center">
