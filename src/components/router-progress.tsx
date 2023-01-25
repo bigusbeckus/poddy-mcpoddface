@@ -15,6 +15,7 @@ const progressBarSteps = [
   "w-[80%]",
   "w-[90%]",
   "w-[95%]",
+  "w-[98%]",
 ];
 
 type RouterProgresProps = {
@@ -104,7 +105,7 @@ export const RouterProgres: React.FC<RouterProgresProps> = ({
   }, [router]);
 
   return (
-    <div ref={loaderWrapper} className="h-0.5 w-full bg-transparent">
+    <div ref={loaderWrapper} className="absolute h-0.5 w-full bg-transparent">
       <div
         ref={loaderProgress}
         className={`${_className} h-full bg-green-500 dark:bg-white rounded-r-md transition-all duration-700`}
