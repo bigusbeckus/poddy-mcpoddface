@@ -138,7 +138,7 @@ export default async function handler(
       }
 
       const episode: Omit<Prisma.EpisodeCreateInput, "Podcast"> = {
-        title: item["title"],
+        title: item["title"].toString(),
         url: item["enclosure"]["@_url"],
         length: parseInt(item["enclosure"]["@_length"]),
         type: item["enclosure"]["@_type"],
@@ -260,9 +260,17 @@ export default async function handler(
               ({
                 create: episode,
                 update: episode as Prisma.EpisodeUpdateInput,
-                where: {
-                  guid: episode.guid,
-                },
+                where: episode.guid
+                  ? {
+                      guid: episode.guid,
+                    }
+                  : {
+                      title_url_length: {
+                        title: episode.title,
+                        url: episode.url,
+                        length: episode.length,
+                      },
+                    },
               } as Prisma.EpisodeUpsertWithWhereUniqueWithoutPodcastInput)
           ),
         },
