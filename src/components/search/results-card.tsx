@@ -29,8 +29,7 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
   const router = useRouter();
 
   const [terms, setTerms] = useAtom(searchAtom);
-  const { recentSearches, addToRecentSearches, clearRecentSearches } =
-    useRecentSearches();
+  const { recentSearches, addToRecentSearches, clearRecentSearches } = useRecentSearches();
 
   const searchLink = podcastSearchLink().term(terms).limit(SEARCH_ITEMS_LIMIT);
   const { data, error, refetch, isInitialLoading } = useQuery({
@@ -48,7 +47,7 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
     e.preventDefault();
     if (terms.trim()) {
       addToRecentSearches(terms);
-      router.push(`/search/?query=${encodeURI(terms)}`);
+      router.push(`/search/?q=${encodeURI(terms)}`);
     }
   }
 
@@ -103,33 +102,33 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
           placeholder="Search"
           value={terms}
           onChange={handleInputChange}
-          className={`px-3 py-2 w-96 placeholder-black/70 dark:placeholder-white/50 text-lg rounded-l-lg  backdrop-blur-sm bg-black/20 dark:bg-white/10 outline-none border-transparent border-solid border-2 border-r-1 transition focus:border-y-black/30 dark:focus:border-y-white/10 border-r-black/30 dark:border-r-white/5 focus:border-x-black/30 dark:focus:border-x-white/10 duration-150`}
+          className={`border-r-1 w-96 rounded-l-lg border-2 border-solid border-transparent border-r-black/30  bg-black/20 px-3 py-2 text-lg placeholder-black/70 outline-none backdrop-blur-sm transition duration-150 focus:border-y-black/30 focus:border-x-black/30 dark:border-r-white/5 dark:bg-white/10 dark:placeholder-white/50 dark:focus:border-y-white/10 dark:focus:border-x-white/10`}
           onFocus={handleSearchFieldFocus}
           onBlur={handleSearchFieldFocus}
         />
         <button
-          className={`pl-2 pr-3 rounded-r-lg backdrop-blur-sm bg-black/20 hover:bg-black/30 dark:bg-white/10 dark:hover:bg-white/20 dark:active:bg-white/30 transition-colors border-transparent border-solid border-2 border-l-0 flex flex-col justify-center ${
+          className={`flex flex-col justify-center rounded-r-lg border-2 border-l-0 border-solid border-transparent bg-black/20 pl-2 pr-3 backdrop-blur-sm transition-colors hover:bg-black/30 dark:bg-white/10 dark:hover:bg-white/20 dark:active:bg-white/30 ${
             isSearchInputFocused
-              ? "border-r-black/30 border-y-black/30 dark:border-r-white/10 dark:border-y-white/10"
+              ? "border-y-black/30 border-r-black/30 dark:border-y-white/10 dark:border-r-white/10"
               : ""
           }`}
           type="submit"
         >
           <Search
             size={20}
-            className={`inline-block stroke-black dark:stroke-white transition duration-150 ${
+            className={`inline-block stroke-black transition duration-150 dark:stroke-white ${
               isSearchInputFocused ? "opacity-100" : "opacity-50"
             }`}
           />
         </button>
       </form>
-      <div className="w-full flex justify-center items-top mt-1">
+      <div className="items-top mt-1 flex w-full justify-center">
         <div
-          className={`fixed overflow-hidden rounded-md origin-top backdrop-blur-md ${
+          className={`fixed origin-top overflow-hidden rounded-md backdrop-blur-md ${
             showSearchCard() ? "" : "opacity-0"
           } transition-opacity`}
         >
-          <div className="px-2 py-2 bg-black/20 dark:bg-white/20 border-solid border-1 border-black/40 dark:border-white/40 rounded-md max-h-96 overflow-y-scroll">
+          <div className="border-1 max-h-96 overflow-y-scroll rounded-md border-solid border-black/40 bg-black/20 px-2 py-2 dark:border-white/40 dark:bg-white/20">
             <div className="w-[26rem]">
               {showSearchCard() &&
                 (isInitialLoading ? (
@@ -158,13 +157,13 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
                   )
                 ) : recentSearches.length > 0 ? (
                   <div className="">
-                    <div className="px-2 pt-1 py-2 text-sm text-black/50 dark:text-white/50">
+                    <div className="px-2 py-2 pt-1 text-sm text-black/50 dark:text-white/50">
                       Recent searches
                     </div>
                     {recentSearches.map((item) => (
                       <Link
                         key={item.id}
-                        href={`/search/?query=${encodeURI(item.searchTerm)}`}
+                        href={`/search/?q=${encodeURI(item.searchTerm)}`}
                         passHref
                       >
                         <a>
@@ -175,7 +174,7 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
                     ))}
                     <div className="flex justify-end pt-2 pb-1">
                       <button
-                        className="text-xs text-green-700 hover:text-green-900 dark:text-green-400 dark:hover:text-green-500 font-bold"
+                        className="text-xs font-bold text-green-700 hover:text-green-900 dark:text-green-400 dark:hover:text-green-500"
                         onClick={() => clearRecentSearches()}
                       >
                         Clear recents

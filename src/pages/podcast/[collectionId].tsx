@@ -82,25 +82,41 @@ const SelectedPodcastPage = ({
     enabled: !!podcast,
   });
   if (podcastIsLoading || feedIsLoading) {
-    return <div className="p-8">Loading...</div>;
+    return (
+      <AnimatedLayout>
+        <div className="h-full p-8">Loading...</div>;
+      </AnimatedLayout>
+    );
   }
 
   if (podcastError || feedError) {
     const error = podcastError ?? feedError;
     return (
-      <div className="p-8">
-        Error:{" "}
-        {error instanceof Error ? error.message : `Lookup failed on collectionId: ${collectionId}`}
-      </div>
+      <AnimatedLayout>
+        <div className="p-8">
+          Error:{" "}
+          {error instanceof Error
+            ? error.message
+            : `Lookup failed on collectionId: ${collectionId}`}
+        </div>
+      </AnimatedLayout>
     );
   }
 
   if (!(podcast && podcast.resultCount > 0 && podcast.results)) {
-    return <div>Podcast not found</div>;
+    return (
+      <AnimatedLayout>
+        <div>Podcast not found</div>
+      </AnimatedLayout>
+    );
   }
 
   if (!feed) {
-    return <div>No episodes found</div>;
+    return (
+      <AnimatedLayout>
+        <div>No episodes found</div>
+      </AnimatedLayout>
+    );
   }
 
   return (
