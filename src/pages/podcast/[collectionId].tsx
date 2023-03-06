@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { podcastSearchLink, SearchReturn } from "../../libs/itunes-podcast";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-// import { PodcastDetails } from "../../components/podcast-details";
 import { AnimatedLayout } from "layouts/animated";
 import { getFeed } from "libs/itunes-podcast";
 import { FetchedImage } from "components/image";

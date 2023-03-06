@@ -24,7 +24,7 @@ export const EpisodeItem: React.FC<EpisodeItemProps> = (props) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isThumbHovered, setIsThumbHovered] = useState(false);
   const isCurrentTrack = playback.current.media && playback.current.media.track.url === props.url;
-  const isCurrentlyPlaying = isCurrentTrack && playback.current.playbackState === "playing";
+  const isCurrentlyPlaying = isCurrentTrack && playback.current.element.playbackState === "playing";
 
   function handleOnClick() {
     props.onClick();
@@ -54,7 +54,7 @@ export const EpisodeItem: React.FC<EpisodeItemProps> = (props) => {
           collectionId: props.podcast.collectionId,
         },
       });
-    } else if (playback.current.playbackState === "playing") {
+    } else if (playback.current.element.playbackState === "playing") {
       playback.current.controls.pause();
     } else {
       playback.current.controls.play();
