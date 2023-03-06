@@ -24,6 +24,7 @@ type PlayerProps = {
 
 export const audioElementAtom = atom(null as HTMLAudioElement | null);
 export const mediaAtom = atom(undefined as Media | undefined);
+export const currentTimeAtom = atom(0);
 
 const playbackStateAtom = atom("none" as PlaybackState);
 
@@ -52,14 +53,51 @@ export function usePlayback() {
   const [playbackState, setPlaybackState] = useAtom(playbackStateAtom);
   // const [media, setMedia] = useState(undefined as Media | undefined);
   const [audioElement] = useAtom(audioElementAtom);
+  const [bufferedTime, setBufferedTime] = useState(0);
+  const setCurrentTime = useAtom(currentTimeAtom)[1];
+
+  const currentTime = useRef(0);
+  const timeUpdateInterval = useRef(undefined as NodeJS.Timer | undefined);
 
   const handleOnPlay = useCallback((e: Event) => {
     console.log(e);
   }, []);
 
+  const handleProgress = useCallback((e: ProgressEvent) => {
+    setBufferedTime((e.target as HTMLAudioElement).buffered.end(0));
+  }, []);
+
+  const handleTimeUpdate = useCallback((e: Event) => {
+    currentTime.current = (e.target as HTMLAudioElement).currentTime;
+  }, []);
+
+  const timeUpdateIntervalHandler = useCallback(() => {
+    if (audioElement && playbackState === "playing") {
+      setCurrentTime(currentTime.current);
+    }
+  }, [audioElement, playbackState, setCurrentTime]);
+
   useEffect(() => {
     audioElement?.addEventListener("play", handleOnPlay);
-  }, [audioElement, handleOnPlay]);
+    audioElement?.addEventListener("progress", handleProgress);
+    audioElement?.addEventListener("timeupdate", handleTimeUpdate);
+
+    timeUpdateInterval.current = setInterval(timeUpdateIntervalHandler, 500);
+
+    return () => {
+      audioElement?.removeEventListener("play", handleOnPlay);
+      audioElement?.removeEventListener("progress", handleProgress);
+      audioElement?.removeEventListener("timeupdate", handleTimeUpdate);
+      clearInterval(timeUpdateInterval.current);
+    };
+  }, [
+    audioElement,
+    handleOnPlay,
+    handleProgress,
+    handleTimeUpdate,
+    timeUpdateInterval,
+    timeUpdateIntervalHandler,
+  ]);
 
   async function setTrack(media: Media) {
     if (!audioElement) {
@@ -73,6 +111,7 @@ export function usePlayback() {
     audioElement.src = media.track.url;
     audioElement.load();
     setMedia(media);
+    setBufferedTime(0);
     setPlaybackState("playing");
   }
 
@@ -156,10 +195,15 @@ export function usePlayback() {
     clearSource,
     current: {
       media: useAtom(mediaAtom)[0],
+      element: {
+        playbackState: useAtom(playbackStateAtom)[0],
+        currentTime: useAtom(currentTimeAtom)[0],
+        bufferedTime,
+        duration: audioElement?.duration,
+      },
       // media,
       isMuted: useState(isMuted())[0],
       // isPlaying: useState(isPlaying())[0],
-      playbackState: useAtom(playbackStateAtom)[0],
       controls: {
         play,
         pause,
@@ -184,7 +228,7 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
   }, [setAudioElement]);
 
   function handlePlaybackToggle() {
-    const playbackState = playback.current.playbackState;
+    const playbackState = playback.current.element.playbackState;
     if (playbackState === "playing") {
       playback.current.controls.pause();
     } else {
@@ -225,7 +269,7 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
           )}
         </div>
 
-        <div className="grid flex-1 grid-cols-1 grid-rows-2 px-4">
+        <div className="grid flex-1 grid-cols-1 grid-rows-3 px-4">
           <div className="row-span-1 flex flex-col justify-center">
             <h2 className="font-bold">{playback.current.media?.track.title ?? "-"}</h2>
             <div className="text-gray-400">
@@ -244,7 +288,8 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
           </div>
 
           {/* Media controls */}
-          <div className="row-span-1 flex flex-col justify-center">
+          <div className="row-span-2 flex flex-col justify-center">
+            {/* Controls */}
             <div className="flex gap-8">
               <button>
                 <SkipBack size={20} className="fill-white" />
@@ -253,7 +298,7 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
                 <RotateCcw size={20} />
               </button>
               <button onClick={handlePlaybackToggle} className="rounded-full bg-white p-2">
-                {playback.current.playbackState === "playing" ? (
+                {playback.current.element.playbackState === "playing" ? (
                   <Pause size={20} className="fill-black stroke-none" />
                 ) : (
                   <Play size={20} className="fill-black stroke-none" />
@@ -265,6 +310,66 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
               <button>
                 <SkipForward size={20} className="fill-white" />
               </button>
+              {/* Debug info */}
+              <div className="fixed bottom-0 right-0 z-50 w-52 bg-black/30 p-4">
+                <div>
+                  Duration:{" "}
+                  {playback.current.element.duration
+                    ? playback.current.element.duration.toFixed(2)
+                    : 0}
+                </div>
+                <div>Current: {playback.current.element.currentTime.toFixed(2)}</div>
+                <div>Buffered: {playback.current.element.bufferedTime.toFixed(2)}</div>
+                <div>
+                  Buffer %:{" "}
+                  {playback.current.element.duration && playback.current.element.duration > 0
+                    ? (
+                        (playback.current.element.bufferedTime /
+                          playback.current.element.duration) *
+                        100
+                      ).toFixed(2)
+                    : 0}
+                </div>
+                <div>
+                  Progress %:{" "}
+                  {playback.current.element.duration && playback.current.element.duration > 0
+                    ? (
+                        (playback.current.element.currentTime / playback.current.element.duration) *
+                        100
+                      ).toFixed(0)
+                    : 0}
+                </div>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="mt-4 w-full">
+              <div className="w-85 relative h-2 overflow-clip rounded-md bg-gray-800">
+                <hr
+                  className="absolute h-full border-none bg-gray-600"
+                  style={{
+                    width: `${
+                      playback.current.element.duration && playback.current.element.duration > 0
+                        ? (playback.current.element.bufferedTime /
+                            playback.current.element.duration) *
+                          100
+                        : 0
+                    }%`,
+                  }}
+                />
+                <hr
+                  className="absolute h-full border-none bg-green-400"
+                  style={{
+                    width: `${
+                      playback.current.element.duration && playback.current.element.duration > 0
+                        ? (playback.current.element.currentTime /
+                            playback.current.element.duration) *
+                          100
+                        : 0
+                    }%`,
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
