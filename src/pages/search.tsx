@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AnimatedLayout } from "layouts/animated";
 import { podcastSearchLink } from "libs/itunes-podcast";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -62,9 +63,13 @@ const Search = ({ q }: InferGetServerSidePropsType<typeof getServerSideProps>) =
 
   return (
     <AnimatedLayout>
-      <div className="h-full overflow-y-scroll">
+      <Head>
+        <title>{data.resultCount} result(s) - Search - Poddy McPodface</title>
+      </Head>
+      <div className="h-full overflow-y-scroll p-8">
         <div>
-          <h1 className="text-2xl font-light">{data.resultCount.toString()} results found</h1>
+          <h1 className="text-3xl font-light">{data.resultCount.toString()} result(s) found</h1>
+          <hr className="my-8 border-white/10" />
           <ul>
             {data.results.map((podcast) => (
               <li key={podcast.collectionId}>

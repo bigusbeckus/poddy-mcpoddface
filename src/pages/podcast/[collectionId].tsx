@@ -7,6 +7,7 @@ import { getFeed } from "libs/itunes-podcast";
 import { FetchedImage } from "components/image";
 import { Episode, iTunesCategory } from "@prisma/client";
 import { EpisodeItem } from "components/episode-item";
+import Head from "next/head";
 
 export const getServerSideProps: GetServerSideProps<{
   collectionId: number;
@@ -121,6 +122,9 @@ const SelectedPodcastPage = ({
 
   return (
     <AnimatedLayout>
+      <Head>
+        <title>{feed.feedTitle} - Poddy McPodface</title>
+      </Head>
       <div className="flex h-full overflow-y-scroll p-8">
         {/* <PodcastDetails podcast={data.results[0]} /> */}
 

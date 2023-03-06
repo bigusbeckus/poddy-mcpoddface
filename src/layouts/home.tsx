@@ -12,18 +12,13 @@ import { useDebounce } from "hooks/debounce";
 
 export const searchInputAtom = atom<string>("");
 
-export const HomeLayout: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const HomeLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [darkMode, setDarkMode] = useContext(ThemeContext);
   const [terms, setTerms] = useAtom(searchInputAtom);
 
   const searchLink = podcastSearchLink().term(terms);
 
-  const { data, error, isFetching, refetch } = useQuery(
-    ["podcasts"],
-    searchLink.fetch
-  );
+  const { data, error, isFetching, refetch } = useQuery(["podcasts"], searchLink.fetch);
 
   const debouncedRefetch = useDebounce(refetch);
 
@@ -35,15 +30,15 @@ export const HomeLayout: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <>
-      <main className="h-full flex flex-col">
-        <NavBar className="w-screen flex justify-between fixed top-0 z-10">
+      <main className="flex h-full flex-col">
+        <NavBar className="fixed top-0 z-10 flex w-screen justify-between">
           <Link href="/">
-            <div className="bg-gray-900 text-primary_light-300 dark:bg-white/50 dark:text-gray-900 py-0 px-2 rounded-sm font-black align-middle cursor-pointer">
-              Poddy McPoddface
+            <div className="cursor-pointer rounded-sm bg-gray-900 py-0 px-2 align-middle font-black text-primary_light-300 dark:bg-white/50 dark:text-gray-900">
+              Poddy McPodface
             </div>
           </Link>
           <div
-            className={`transition duration-100 flex justify-center text-xl w-full z-10 ${
+            className={`z-10 flex w-full justify-center text-xl transition duration-100 ${
               terms ? "py-2" : ""
             }`}
           >
@@ -61,7 +56,7 @@ export const HomeLayout: React.FC<{ children: React.ReactNode }> = ({
             onChange={(checked) => setDarkMode(checked)}
           />
         </NavBar>
-        <div className="h-full flex flex-col">
+        <div className="flex h-full flex-col">
           <div className="h-16"></div>
           <div className="flex-1 overflow-y-scroll">{children}</div>
         </div>

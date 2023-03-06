@@ -9,14 +9,10 @@ type RootLayoutProps = {
   description?: string;
 };
 
-const defaultTitle = "Poddy McPodface | Podcasts Everywhere";
+const defaultTitle = "Poddy McPodface - Podcasts Everywhere";
 const defaultDescription = "Cross-platform podcasts for free";
 
-export const RootLayout: React.FC<RootLayoutProps> = ({
-  children,
-  title,
-  description,
-}) => {
+export const RootLayout: React.FC<RootLayoutProps> = ({ children, title, description }) => {
   return (
     <>
       <Head>
@@ -32,9 +28,6 @@ export const RootLayout: React.FC<RootLayoutProps> = ({
   );
 };
 
-export type NextPageWithRootLayout<
-  P = Record<string, unknown>,
-  IP = P
-> = NextPage<P, IP> & {
+export type NextPageWithRootLayout<P = Record<string, unknown>, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
