@@ -32,3 +32,27 @@ export function parseDurationSeconds(duration: string) {
     return undefined;
   }
 }
+
+export function getDurationString(duration: number) {
+  let durationString = "",
+    hours = 0,
+    minutes = 0,
+    seconds = 0;
+  if (duration > 3600) {
+    hours = Math.floor(duration / 3600);
+    duration -= hours * 3600;
+    durationString += `${hours}`;
+  }
+  if (duration > 60) {
+    minutes = Math.floor(duration / 60);
+    duration -= minutes * 60;
+    durationString += `${hours > 0 ? ":" : ""}${minutes
+      .toString()
+      .padStart(2, "0")}`;
+  }
+  seconds = duration;
+  durationString += `${hours > 0 || minutes > 0 ? ":" : ""}${seconds
+    .toString()
+    .padStart(2, "0")}`;
+  return durationString;
+}

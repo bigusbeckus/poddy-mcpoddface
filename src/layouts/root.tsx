@@ -24,7 +24,7 @@ export const RootLayout: React.FC<RootLayoutProps> = ({
         <meta name="description" content={description ?? defaultDescription} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="h-full overflow-hidden dark:bg-black/40 dark:text-inherit bg-white text-black dark:text-white">
+      <div className="h-full overflow-hidden bg-white text-black dark:bg-black/40 dark:text-inherit dark:text-white">
         <RouterProgres />
         {children}
       </div>

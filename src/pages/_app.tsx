@@ -2,14 +2,10 @@ import "styles/globals.css";
 import type { AppProps } from "next/app";
 import { NextPageWithRootLayout, RootLayout } from "layouts/root";
 import { useState } from "react";
-import {
-  DehydratedState,
-  Hydrate,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { DehydratedState, Hydrate, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useSystemThemeChangeListener } from "hooks/theme";
 import { AnimatePresence } from "framer-motion";
+import { Player } from "components/player";
 
 type AppPropsWithRootLayout = AppProps<{
   dehydratedState?: DehydratedState;
@@ -36,11 +32,16 @@ function MyApp({ Component, pageProps, router }: AppPropsWithRootLayout) {
     <RootLayout>
       <QueryClientProvider client={queryClient}>
         <Hydrate state={pageProps.dehydratedState}>
-          {getLayout(
-            <AnimatePresence mode="wait" initial={false}>
-              <Component {...pageProps} key={router.asPath} />
-            </AnimatePresence>
-          )}
+          <div className="flex h-full flex-col pb-1">
+            <div className="h-full flex-1 overflow-y-hidden">
+              {getLayout(
+                <AnimatePresence mode="wait" initial={false}>
+                  <Component {...pageProps} key={router.asPath} />
+                </AnimatePresence>
+              )}
+            </div>
+            <Player />
+          </div>
         </Hydrate>
       </QueryClientProvider>
     </RootLayout>

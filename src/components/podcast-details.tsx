@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 // import { GetServerSideProps } from "next";
 import { getFeed, PodcastSearchResult } from "libs/itunes-podcast";
 import { FetchedImage } from "components/image";
-import { PodcastDescription } from "components/podcast-description";
+import { EpisodeItem } from "./episode-item";
 
 type PodcastDetailsProps = {
   podcast: PodcastSearchResult;
@@ -20,33 +20,12 @@ type PodcastDetailsProps = {
 // }
 
 export const PodcastDetails: React.FC<PodcastDetailsProps> = ({ podcast }) => {
-  const { data, isLoading, error } = useQuery(
-    ["podcast", podcast.collectionId, "feed"],
-    () => getFeed(podcast.collectionId)
+  const { data, isLoading, error } = useQuery(["podcast", podcast.collectionId, "feed"], () =>
+    getFeed(podcast.collectionId)
   );
 
-  function getDurationString(duration: number) {
-    let durationString = "",
-      hours = 0,
-      minutes = 0,
-      seconds = 0;
-    if (duration > 3600) {
-      hours = Math.floor(duration / 3600);
-      duration -= hours * 3600;
-      durationString += `${hours}`;
-    }
-    if (duration > 60) {
-      minutes = Math.floor(duration / 60);
-      duration -= minutes * 60;
-      durationString += `${hours > 0 ? ":" : ""}${minutes
-        .toString()
-        .padStart(2, "0")}`;
-    }
-    seconds = duration;
-    durationString += `${hours > 0 || minutes > 0 ? ":" : ""}${seconds
-      .toString()
-      .padStart(2, "0")}`;
-    return durationString;
+  function handleEpisodeOnClick(feedUrl: string) {
+    console.log(feedUrl);
   }
 
   if (isLoading) {
@@ -66,20 +45,20 @@ export const PodcastDetails: React.FC<PodcastDetailsProps> = ({ podcast }) => {
 
   return (
     <>
-      <div className="flex">
+      <div className="flex p-8 pb-0">
         {/* Thumbnail and details */}
-        <div className="shrink w-96 sticky top-24 flex-align-start">
+        <div className="flex-align-start sticky top-24 w-96 shrink">
           <FetchedImage
             src={data.itunesArtworkUrl600}
             alt={`${data.feedTitle} thumbnail`}
             imgClassName="rounded-md"
           />
-          <h1 className="text-3xl text-center py-4">{data.feedTitle}</h1>
-          <div className="py-2 flex flex-wrap justify-center gap-2">
+          <h1 className="py-4 text-center text-3xl">{data.feedTitle}</h1>
+          <div className="flex flex-wrap justify-center gap-2 py-2">
             {data.feedItunesCategories?.map((category: iTunesCategory) => (
               <span
                 key={category.id}
-                className="py-1 px-2 text-sm font-bold rounded-xl dark:bg-white/20 bg-black/20"
+                className="rounded-xl bg-black/20 py-1 px-2 text-sm font-bold dark:bg-white/20"
               >
                 {category.text}
               </span>
@@ -87,44 +66,23 @@ export const PodcastDetails: React.FC<PodcastDetailsProps> = ({ podcast }) => {
           </div>
         </div>
         {/* Episodes */}
-        <div className="grow w-96 pl-16 grid grid-cols-1 gap-3">
+        <div className="grid w-96 grow grid-cols-1 gap-3 pl-16">
           {/* <h1 className="text-3xl">Episodes</h1> */}
           {data.episodes.map((episode: Episode) => (
-            <div
+            <EpisodeItem
               key={episode.id}
-              className="p-2 rounded-md bg-black/20 dark:bg-white/20"
-            >
-              <div className="flex h-32">
-                <div className="w-32 shrink-0 grow-0">
-                  <FetchedImage
-                    src={episode.itunesImage ?? data.itunesArtworkUrl600}
-                    alt={`${episode.title} thumbnail`}
-                    imgClassName="w-full"
-                    fill
-                  />
-                </div>
-                <div className="flex-grow pl-4 grid grid-rows-4">
-                  <div className="text-xl font-bold pb-2 row-span-1">
-                    {episode.title}
-                  </div>
-                  <div className="text-sm row-span-2 dark:text-white/80">
-                    <PodcastDescription
-                      description={episode.description}
-                      className="line-clamp-2"
-                    />
-                  </div>
-                  <div className="row-span-1">
-                    {episode.itunesDuration ? (
-                      <div className=" align-bottom ">
-                        {getDurationString(episode.itunesDuration)}
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+              title={episode.title}
+              description={episode.description ?? undefined}
+              url={episode.url}
+              artworkUrl={episode.itunesImage ?? data.itunesArtworkUrl600}
+              duration={episode.itunesDuration ?? undefined}
+              podcast={{
+                title: data.feedTitle,
+                url: `/podcast/${data.itunesCollectionId}`,
+                collectionId,
+              }}
+              onClick={() => handleEpisodeOnClick(episode.url)}
+            />
           ))}
         </div>
       </div>
