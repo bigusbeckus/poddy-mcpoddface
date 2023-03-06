@@ -8,6 +8,7 @@ import { differenceInHours, parse } from "date-fns";
 import { EPISODE_FETCH_LIMIT } from "../../../server/constants/limits";
 import { EPISODE_DEFAULT_ORDER_BY } from "../../../server/constants/order";
 import { parseDurationSeconds } from "../../../libs/util/converters";
+import { createHash } from "crypto";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function itemValid(item: any) {
@@ -21,10 +22,7 @@ function itemValid(item: any) {
   );
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { id } = req.body;
     // Ensure id exists
@@ -49,17 +47,12 @@ export default async function handler(
     });
 
     // Respond if entry is found and is not stale
-    if (
-      dbResponse &&
-      differenceInHours(new Date(), dbResponse.createdAt) < 24
-    ) {
+    if (dbResponse && differenceInHours(new Date(), dbResponse.createdAt) < 24) {
       return res.status(200).send(dbResponse);
     }
 
     // Lookup podcast if db entry hasn't been found or is stale
-    const lookupResponse = (
-      await axios.get(`${ITUNES_PODCAST_LOOKUP_LINK}&id=${id}`)
-    ).data;
+    const lookupResponse = (await axios.get(`${ITUNES_PODCAST_LOOKUP_LINK}&id=${id}`)).data;
 
     if (!(lookupResponse && lookupResponse.resultCount > 0)) {
       return res.status(404).json({
@@ -145,14 +138,14 @@ export default async function handler(
         guid:
           item["guid"] && item["guid"]["#text"]
             ? item["guid"]["#text"].toString()
-            : undefined,
+            : createHash("sha256")
+                .update(`${item["enclosure"]["@_url"]}-${item["title"]}}-${item["pubDate"] ?? ""}`)
+                .digest("base64"),
         pubDate: item["pubDate"]
           ? parse(
               (() => {
                 const fragments = item["pubDate"].split(" ");
-                return `${fragments
-                  .slice(0, fragments.length - 1)
-                  .join(" ")} +0000`;
+                return `${fragments.slice(0, fragments.length - 1).join(" ")} +0000`;
               })(),
               "E, dd MMM yyyy HH:mm:ss xx",
               new Date()
@@ -163,9 +156,7 @@ export default async function handler(
           ? parseInt(item["itunes:duration"])
           : parseDurationSeconds(item["itunes:duration"]),
         link: item["link"]?.toString(),
-        itunesImage: item["itunes:image"]
-          ? item["itunes:image"]["@_href"]
-          : undefined,
+        itunesImage: item["itunes:image"] ? item["itunes:image"]["@_href"] : undefined,
         itunesExplicit: item["itunes:explicit"] === "yes",
         itunesEpisode: item["itunes:episode"],
         itunesSeason: item["itunes:season"],
