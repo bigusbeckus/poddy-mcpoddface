@@ -1,10 +1,8 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 
-export const AnimatedLayout: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AnimatedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <motion.span
+    <m.span
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -13,6 +11,6 @@ export const AnimatedLayout: React.FC<{ children: React.ReactNode }> = ({
       }}
     >
       {children}
-    </motion.span>
+    </m.span>
   );
 };

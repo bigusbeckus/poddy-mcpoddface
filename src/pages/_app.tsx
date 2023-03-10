@@ -4,7 +4,7 @@ import { NextPageWithRootLayout, RootLayout } from "layouts/root";
 import { useState } from "react";
 import { DehydratedState, Hydrate, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useSystemThemeChangeListener } from "hooks/theme";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, LazyMotion, domAnimation } from "framer-motion";
 import { Player } from "components/player";
 
 type AppPropsWithRootLayout = AppProps<{
@@ -35,9 +35,11 @@ function MyApp({ Component, pageProps, router }: AppPropsWithRootLayout) {
           <div className="flex h-full flex-col pb-1">
             <div className="h-full flex-1 overflow-y-hidden">
               {getLayout(
-                <AnimatePresence mode="wait" initial={false}>
-                  <Component {...pageProps} key={router.asPath} />
-                </AnimatePresence>
+                <LazyMotion features={domAnimation}>
+                  <AnimatePresence mode="wait" initial={false}>
+                    <Component {...pageProps} key={router.asPath} />
+                  </AnimatePresence>
+                </LazyMotion>
               )}
             </div>
             <Player />
