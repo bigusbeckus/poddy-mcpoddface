@@ -63,7 +63,7 @@ export const EpisodeItem: React.FC<EpisodeItemProps> = (props) => {
 
   return (
     <div
-      className={`cursor-pointer overflow-clip rounded-lg transition-colors hover:bg-black/20 hover:dark:bg-gray-800 ${
+      className={`cursor-pointer overflow-hidden rounded-lg transition-colors hover:bg-black/20 hover:dark:bg-gray-800 ${
         isCurrentTrack ? "dark:bg-gray-800" : ""
       }`}
       onClick={handleOnClick}

@@ -344,7 +344,7 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
 
             {/* Progress bar */}
             <div className="mt-4 w-full">
-              <div className="w-85 relative h-2 overflow-clip rounded-md bg-gray-800">
+              <div className="w-85 relative h-2 overflow-hidden rounded-md bg-gray-800">
                 <hr
                   className="absolute h-full border-none bg-gray-600"
                   style={{
