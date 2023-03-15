@@ -5,11 +5,11 @@ import { DefaultFooter } from "@/components/footer";
 import { getErrorMessages } from "@/utils/get-app-error-message";
 import { useSystemThemeChangeListener } from "@/hooks/theme";
 
-type CustomErrorPageProps = {
+type Custom404PageProps = {
   statusCode: number;
 };
 
-const CustomErrorPage: NextPage<CustomErrorPageProps> = ({ statusCode }) => {
+const Custom404Page: NextPage<Custom404PageProps> = ({ statusCode }) => {
   useSystemThemeChangeListener();
 
   const errorMessage = getErrorMessages(statusCode);
@@ -53,9 +53,9 @@ const CustomErrorPage: NextPage<CustomErrorPageProps> = ({ statusCode }) => {
   );
 };
 
-CustomErrorPage.getInitialProps = ({ res, err }) => {
+Custom404Page.getInitialProps = ({ res, err }) => {
   const statusCode = res?.statusCode ?? err?.statusCode ?? 404;
   return { statusCode };
 };
 
-export default CustomErrorPage;
+export default Custom404Page;
