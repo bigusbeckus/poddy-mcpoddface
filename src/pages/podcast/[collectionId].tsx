@@ -1,11 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { podcastSearchLink, SearchReturn } from "../../libs/itunes-podcast";
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { AnimatedLayout } from "layouts/animated";
-import { getFeed } from "libs/itunes-podcast";
-import { FetchedImage } from "components/image";
-import { Episode, iTunesCategory } from "@prisma/client";
-import { EpisodeItem } from "components/episode-item";
+import { podcastSearchLink, type SearchReturn } from "@/libs/itunes-podcast";
+import { type GetServerSideProps, type InferGetServerSidePropsType } from "next";
+import { AnimatedLayout } from "@/layouts/animated";
+import { getFeed } from "@/libs/itunes-podcast";
+import { FetchedImage } from "@/components/image";
+import { type iTunesCategory } from "@prisma/client";
+import { EpisodeItem } from "@/components/episode-item";
 import Head from "next/head";
 
 export const getServerSideProps: GetServerSideProps<{
@@ -46,31 +46,29 @@ const SelectedPodcastPage = ({
     data: podcast,
     error: podcastError,
     isLoading: podcastIsLoading,
-  } = useQuery(
-    ["podcast", collectionId],
-    () => podcastSearchLink().term(collectionId.toString()).fetch(),
-    {
-      initialData: () => {
-        const result = (queryClient.getQueryData(["podcasts"]) as SearchReturn)?.results.find(
-          (podcast) => podcast.collectionId.toString() === collectionId.toString()
-        );
-        console.log("Cached: ", result);
-        if (result) {
-          return {
-            resultCount: 1,
-            results: [result],
-          } as SearchReturn;
-        } else {
-          return undefined;
-        }
-        // //! FOR CACHE TESTING ONLY
-        // return {
-        //   resultCount: 1,
-        //   results: [result],
-        // };
-      },
-    }
-  );
+  } = useQuery({
+    queryKey: ["podcast", collectionId],
+    queryFn: () => podcastSearchLink().term(collectionId.toString()).fetch(),
+    placeholderData: () => {
+      const result = (queryClient.getQueryData(["podcasts"]) as SearchReturn)?.results.find(
+        (podcast) => podcast.collectionId.toString() === collectionId.toString()
+      );
+      console.log("Cached: ", result);
+      if (result) {
+        return {
+          resultCount: 1,
+          results: [result],
+        } as SearchReturn;
+      } else {
+        return undefined;
+      }
+      // //! FOR CACHE TESTING ONLY
+      // return {
+      //   resultCount: 1,
+      //   results: [result],
+      // };
+    },
+  });
 
   const {
     data: feed,
@@ -81,6 +79,7 @@ const SelectedPodcastPage = ({
     queryFn: () => getFeed(collectionId),
     enabled: !!podcast,
   });
+
   if (podcastIsLoading || feedIsLoading) {
     return (
       <AnimatedLayout>
@@ -124,11 +123,11 @@ const SelectedPodcastPage = ({
       <Head>
         <title>{feed.feedTitle} - Poddy McPodface</title>
       </Head>
-      <div className="flex h-full overflow-y-scroll p-8">
+      <div className="flex h-full overflow-y-scroll">
         {/* <PodcastDetails podcast={data.results[0]} /> */}
 
         {/* Thumbnail and details */}
-        <div className="flex-align-start sticky top-24 w-96 shrink">
+        <div className="flex-align-start sticky top-24 w-96 shrink p-8">
           <FetchedImage
             src={feed.itunesArtworkUrl600}
             alt={`${feed.feedTitle} thumbnail`}
@@ -147,24 +146,26 @@ const SelectedPodcastPage = ({
           </div>
         </div>
         {/* Episodes */}
-        <div className="grid w-96 grow grid-cols-1 gap-3 pl-16">
-          {/* <h1 className="text-2xl font-bold">Episodes</h1> */}
-          {feed.episodes.map((episode: Episode) => (
-            <EpisodeItem
-              key={episode.id}
-              title={episode.title}
-              description={episode.description ?? undefined}
-              url={episode.url}
-              artworkUrl={episode.itunesImage ?? feed.itunesArtworkUrl100}
-              duration={episode.itunesDuration ?? undefined}
-              podcast={{
-                title: feed.feedTitle,
-                url: `/podcast/${collectionId}`,
-                collectionId,
-              }}
-              onClick={() => handleEpisodeOnClick(episode.url)}
-            />
-          ))}
+        <div className="flex-1 overflow-y-scroll px-8">
+          <div className="grid w-full grow grid-cols-1 gap-3 py-8">
+            {/* <h1 className="text-2xl font-bold">Episodes</h1> */}
+            {feed.episodes.map((episode) => (
+              <EpisodeItem
+                key={episode.id}
+                title={episode.title}
+                description={episode.description ?? undefined}
+                url={episode.url}
+                artworkUrl={episode.itunesImage ?? feed.itunesArtworkUrl100}
+                duration={episode.itunesDuration ?? undefined}
+                podcast={{
+                  title: feed.feedTitle,
+                  url: `/podcast/${collectionId}`,
+                  collectionId,
+                }}
+                onClick={() => handleEpisodeOnClick(episode.url)}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </AnimatedLayout>
