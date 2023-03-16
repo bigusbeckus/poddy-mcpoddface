@@ -1,4 +1,4 @@
-import { createLogger, format, transports } from "winston";
+import { createLogger, type LoggerOptions, format, transports } from "winston";
 import { env } from "@/env.mjs";
 
 const logDir = env.LOG_DIR;
@@ -11,53 +11,74 @@ const defaultFormat = format.combine(
   )
 );
 
+const loggerTransports: NonNullable<LoggerOptions["transports"]> = [
+  new transports.Console({
+    format: format.combine(
+      format.colorize(),
+      format.timestamp(),
+      format.align(),
+      format.printf(
+        ({ timestamp, level, message }) => `${timestamp as string} ${level}: ${message as string}`
+      )
+    ),
+  }),
+];
+
+if (env.NODE_ENV === "development") {
+  loggerTransports.push(
+    new transports.File({
+      filename: `${logDir}/combined.log`,
+    })
+  );
+}
 // Initialize winston logger
 export const logger = createLogger({
   level: logLevel,
   format: defaultFormat,
-  transports: [
-    new transports.Console({
-      format: format.combine(
-        format.colorize(),
-        format.timestamp(),
-        format.align(),
-        format.printf(
-          ({ timestamp, level, message }) => `${timestamp as string} ${level}: ${message as string}`
-        )
-      ),
-    }),
-    new transports.File({
-      filename: `${logDir}/combined.log`,
-    }),
-  ],
-  rejectionHandlers: [
-    new transports.File({
-      filename: `${logDir}/rejections.log`,
-    }),
-  ],
-  exceptionHandlers: [
-    new transports.File({
-      filename: `${logDir}/exceptions.log`,
-    }),
-  ],
+  transports: loggerTransports,
+  rejectionHandlers:
+    env.NODE_ENV === "development"
+      ? [
+          new transports.File({
+            filename: `${logDir}/rejections.log`,
+          }),
+        ]
+      : undefined,
+  exceptionHandlers:
+    env.NODE_ENV === "development"
+      ? [
+          new transports.File({
+            filename: `${logDir}/exceptions.log`,
+          }),
+        ]
+      : undefined,
 });
 
 export const dbLogger = createLogger({
   level: logLevel,
   format: defaultFormat,
-  transports: [
-    new transports.File({
-      filename: `${logDir}/db/dbGeneral.log`,
-    }),
-  ],
-  rejectionHandlers: [
-    new transports.File({
-      filename: `${logDir}/db/dbRejections.log`,
-    }),
-  ],
-  exceptionHandlers: [
-    new transports.File({
-      filename: `${logDir}/db/dbExceptions.log`,
-    }),
-  ],
+  transports:
+    env.NODE_ENV === "development"
+      ? [
+          new transports.File({
+            filename: `${logDir}/db/dbGeneral.log`,
+          }),
+        ]
+      : undefined,
+  rejectionHandlers:
+    env.NODE_ENV === "development"
+      ? [
+          new transports.File({
+            filename: `${logDir}/db/dbRejections.log`,
+          }),
+        ]
+      : undefined,
+  exceptionHandlers:
+    env.NODE_ENV === "development"
+      ? [
+          new transports.File({
+            filename: `${logDir}/db/dbExceptions.log`,
+          }),
+        ]
+      : undefined,
 });
