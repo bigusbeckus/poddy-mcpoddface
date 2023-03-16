@@ -1,4 +1,7 @@
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
-export const EPISODE_DEFAULT_ORDER_BY: Prisma.Enumerable<Prisma.EpisodeOrderByWithRelationInput> =
-  [{ pubDate: "desc" }, { itunesSeason: "desc" }, { itunesEpisode: "desc" }];
+export const EPISODE_DEFAULT_ORDER_BY: Prisma.Enumerable<Prisma.EpisodeOrderByWithRelationInput> = [
+  { pubDate: "desc" },
+  { itunesSeason: "desc" },
+  { itunesEpisode: "desc" },
+];

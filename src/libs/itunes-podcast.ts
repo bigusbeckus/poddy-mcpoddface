@@ -1,12 +1,12 @@
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import axios from "axios";
+import { clampInt } from "@/libs/util/number";
 
-export const ITUNES_PODCAST_SEARCH_LINK =
-  "https://itunes.apple.com/search?media=podcast";
-export const ITUNES_PODCAST_LOOKUP_LINK =
-  "https://itunes.apple.com/lookup?&entity=podcast";
+export const ITUNES_PODCAST_SEARCH_LINK = "https://itunes.apple.com/search?media=podcast";
+export const ITUNES_PODCAST_LOOKUP_LINK = "https://itunes.apple.com/lookup?entity=podcast";
+export const ITUNES_RSS_FEED_LINK = "https://rss.applemarketingtools.com/api/v2";
 
-export type PodcastResult = {
+export type PodcastSearchResult = {
   wrapperType: string;
   kind: string;
   artistId: number;
@@ -45,8 +45,123 @@ export type PodcastResult = {
 
 export type SearchReturn = {
   resultCount: number;
-  results: PodcastResult[];
+  results: PodcastSearchResult[];
 };
+
+export type PodcastFeedResult = {
+  id: number;
+  artistName: string;
+  name: string;
+  kind: string;
+  artworkUrl100: string;
+  genres: string[];
+};
+
+export type FeedReturn = {
+  title: string;
+  country: string;
+  updated: string;
+  results: PodcastFeedResult[];
+};
+
+enum FeedType {
+  top,
+  topSubscriber,
+}
+
+enum FeedSubject {
+  podcasts,
+  podcastEpisodes,
+  podcastChannels,
+}
+
+export function podcastFeedLink() {
+  let _country: string | undefined;
+  let _type = FeedType.top;
+  let _subject = FeedSubject.podcasts;
+  let _limit = 10;
+
+  function country(country: string) {
+    _country = country;
+    return obj;
+  }
+  function type(type: FeedType) {
+    _type = type;
+    return obj;
+  }
+  function subject(subject: FeedSubject) {
+    _subject = subject;
+    return obj;
+  }
+  function limit(limit: number) {
+    _limit = clampInt(limit, 1, 100);
+    return obj;
+  }
+
+  function getLink() {
+    let linkEnd = "";
+
+    if (_subject === FeedSubject.podcastEpisodes) {
+      _type = FeedType.top;
+      linkEnd = "podcast-episodes.json";
+    } else if (_subject === FeedSubject.podcastChannels) {
+      _type = FeedType.topSubscriber;
+      linkEnd = "podcast-channels.json";
+    } else {
+      linkEnd = "podcasts.json";
+    }
+
+    const link = `${ITUNES_RSS_FEED_LINK}/${_country ? _country : "gb"}/podcasts/${
+      _type === FeedType.topSubscriber ? "top-subscriber" : "top"
+    }/${_limit}/${linkEnd}`;
+
+    return encodeURI(link);
+  }
+
+  async function fetch() {
+    const { title, country, updated, results } = (await axios.get(getLink())).data.feed;
+    const feedResults = [];
+    if (results) {
+      for (const result of results) {
+        const id = parseInt(result.id);
+        if (isNaN(id)) {
+          continue;
+        }
+        const genres = [];
+        if (result.genres) {
+          for (const genre of result.genres) {
+            genres.push(genre.name);
+          }
+        }
+        feedResults.push({
+          artistName: result.artistName,
+          id: id,
+          name: result.name,
+          kind: result.kind,
+          artworkUrl100: result.artworkUrl100,
+          genres: genres,
+        } as PodcastFeedResult);
+      }
+    }
+    return {
+      title,
+      country,
+      updated,
+      results: feedResults,
+    } as FeedReturn;
+  }
+
+  const obj = {
+    country,
+    type,
+    subject,
+    limit,
+    getLink,
+    fetch,
+  };
+
+  return obj;
+}
 
 export function podcastSearchLink() {
   let _country: string | undefined;
@@ -123,6 +238,9 @@ export function podcastSearchLink() {
 
   async function fetch(): Promise<SearchReturn> {
     return (await axios.get(getLink())).data;
+    // return _term
+    //   ? (await axios.get(getLink())).data
+    //   : Promise.resolve({ resultCount: 0, results: [] } as SearchReturn);
   }
 
   const obj = {
@@ -164,13 +282,7 @@ export async function getFeed(lookupId: number): Promise<
   ).data;
 }
 
-export function getLookupLink({
-  prop,
-  value,
-}: {
-  prop?: string;
-  value: string;
-}) {
+export function getLookupLink({ prop, value }: { prop?: string; value: string }) {
   // TODO: Maybe use zod for validation here?
   const lookupProp = prop ?? "id";
   return `${ITUNES_PODCAST_LOOKUP_LINK}${lookupProp}=${value}`;
@@ -183,9 +295,5 @@ export async function lookupPodcast({
   lookupId: string;
   lookupType?: string;
 }): Promise<SearchReturn> {
-  return (
-    await axios.get(
-      `${ITUNES_PODCAST_LOOKUP_LINK}&${lookupType ?? "id"}=${lookupId}`
-    )
-  ).data;
+  return (await axios.get(`${ITUNES_PODCAST_LOOKUP_LINK}&${lookupType ?? "id"}=${lookupId}`)).data;
 }

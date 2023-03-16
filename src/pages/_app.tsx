@@ -1,21 +1,16 @@
-import "../styles/globals.css";
+import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { RootLayout } from "../layouts/root";
-import { NextPage } from "next";
-import { ReactElement, ReactNode, useState } from "react";
+import { type NextPageWithRootLayout, RootLayout } from "@/layouts/root";
+import { useState } from "react";
 import {
-  DehydratedState,
+  type DehydratedState,
   Hydrate,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-
-export type NextPageWithRootLayout<
-  P = Record<string, unknown>,
-  IP = P
-> = NextPage<P, IP> & {
-  getLayout?: (page: ReactElement) => ReactNode;
-};
+import { useSystemThemeChangeListener } from "@/hooks/theme";
+import { AnimatePresence, LazyMotion, domAnimation } from "framer-motion";
+import { Player } from "@/components/player";
 
 type AppPropsWithRootLayout = AppProps<{
   dehydratedState?: DehydratedState;
@@ -23,7 +18,9 @@ type AppPropsWithRootLayout = AppProps<{
   Component: NextPageWithRootLayout;
 };
 
-function MyApp({ Component, pageProps }: AppPropsWithRootLayout) {
+function MyApp({ Component, pageProps, router }: AppPropsWithRootLayout) {
+  useSystemThemeChangeListener();
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -40,7 +37,18 @@ function MyApp({ Component, pageProps }: AppPropsWithRootLayout) {
     <RootLayout>
       <QueryClientProvider client={queryClient}>
         <Hydrate state={pageProps.dehydratedState}>
-          {getLayout(<Component {...pageProps} />)}
+          <div className="flex h-full flex-col pb-1">
+            <div className="h-full flex-1 overflow-y-hidden">
+              {getLayout(
+                <LazyMotion features={domAnimation}>
+                  <AnimatePresence mode="wait" initial={false}>
+                    <Component {...pageProps} key={router.asPath} />
+                  </AnimatePresence>
+                </LazyMotion>
+              )}
+            </div>
+            <Player />
+          </div>
         </Hydrate>
       </QueryClientProvider>
     </RootLayout>

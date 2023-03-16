@@ -5,8 +5,6 @@ type NavProps = {
 
 export const NavBar: React.FC<NavProps> = ({ className, children }) => {
   return (
-    <header className={"px-8 py-4 flex flex-row drop-shadow-md " + className}>
-      {children}
-    </header>
+    <header className={"flex flex-row px-8 py-4 drop-shadow-md " + className}>{children}</header>
   );
 };

@@ -18,8 +18,8 @@ model Podcast {
   itunesWrapperType            String
   itunesKind                   String
   itunesArtistId               Int?
-  itunesCollectionId           Int              @unique
-  itunesTrackId                Int              @unique
+  itunesCollectionId           Int              @unique(sort: Asc)
+  itunesTrackId                Int              @unique(sort: Asc)
   itunesArtistName             String
   itunesCollectionName         String
   itunesTrackName              String
@@ -76,7 +76,7 @@ model Episode {
   length            Int // File size in bytes
   type              String
   // Episode - Recommended
-  guid              String?     @unique
+  guid              String      @unique
   pubDate           DateTime?
   description       String?
   itunesDuration    Int?
@@ -89,6 +89,8 @@ model Episode {
   itunesEpisodeType EpisodeType @default(FULL)
   Podcast           Podcast     @relation(fields: [podcastId], references: [id])
   podcastId         String      @db.Uuid
+
+  @@unique([title, url, length])
 }
 
 enum EpisodeType {
@@ -110,4 +112,11 @@ enum EpisodeType {
   FULL
   TRAILER
   BONUS
+}
+
+model TopPodcasts {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdAt     DateTime @default(now())
+  country       String   @unique
+  collectionIds Int[]
 }
