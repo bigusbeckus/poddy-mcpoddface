@@ -5,6 +5,12 @@ const server = z.object({
   DATABASE_URL: z.string().url(),
   NODE_ENV: z.enum(["development", "test", "production"]),
   LOG_DIR: z.string().default("logs"),
+  ANALYZE: z
+    .preprocess((val) => {
+      const value = /** @type {string | undefined} */ (val);
+      return value?.toLowerCase();
+    }, z.enum(["true", "false"]))
+    .optional(),
 });
 
 const client = z.object({
@@ -21,6 +27,7 @@ const processEnv = {
   DATABASE_URL: process.env.DATABASE_URL,
   NODE_ENV: process.env.NODE_ENV,
   LOG_DIR: process.env.LOG_DIR,
+  ANALYZE: process.env.ANALYZE,
 };
 
 const merged = server.merge(client);
