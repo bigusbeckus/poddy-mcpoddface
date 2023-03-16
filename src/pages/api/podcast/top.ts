@@ -1,11 +1,8 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { podcastFeedLink } from "../../../libs/itunes-podcast";
-import { prisma } from "../../../server/db/client";
+import { type NextApiRequest, type NextApiResponse } from "next";
+import { podcastFeedLink } from "@/libs/itunes-podcast";
+import { prisma } from "@/server/db/client";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     // Set country
     const country =
@@ -13,9 +10,7 @@ export default async function handler(
         ? req.query.country.toLowerCase()
         : "us";
     // Set fetch limit
-    const parsedLimit = parseInt(
-      req.query.limit ? req.query.limit.toString() : ""
-    );
+    const parsedLimit = parseInt(req.query.limit ? req.query.limit.toString() : "");
     const limit = isNaN(parsedLimit) ? 10 : parsedLimit;
 
     // Fetch top list
@@ -26,10 +21,7 @@ export default async function handler(
     });
 
     if (!feedEntry) {
-      const topList = await podcastFeedLink()
-        .country(country)
-        .limit(100)
-        .fetch();
+      const topList = await podcastFeedLink().country(country).limit(100).fetch();
       const entry = {
         country,
         collectionIds: topList.results.map((item) => item.id),

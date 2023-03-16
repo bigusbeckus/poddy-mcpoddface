@@ -18,8 +18,8 @@ model Podcast {
   itunesWrapperType            String
   itunesKind                   String
   itunesArtistId               Int?
-  itunesCollectionId           Int              @unique
-  itunesTrackId                Int              @unique
+  itunesCollectionId           Int              @unique(sort: Asc)
+  itunesTrackId                Int              @unique(sort: Asc)
   itunesArtistName             String
   itunesCollectionName         String
   itunesTrackName              String
@@ -76,7 +76,7 @@ model Episode {
   length            Int // File size in bytes
   type              String
   // Episode - Recommended
-  guid              String?     @unique
+  guid              String      @unique
   pubDate           DateTime?
   description       String?
   itunesDuration    Int?

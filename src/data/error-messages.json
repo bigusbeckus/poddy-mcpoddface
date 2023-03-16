@@ -1,0 +1,33 @@
+{
+  "default": {
+    "title": "Application error.",
+    "description": "Oh sorry, bud. Looks like I managed to break her, eh?"
+  },
+  "range": [
+    {
+      "min": 400,
+      "max": 499,
+      "description": "Looks like you lost your way there, bud. How's about you mosey on over to the home page and get yourself reacquainted with that there search bar, eh?"
+    },
+    {
+      "min": 500,
+      "max": 599,
+      "title": "Application error."
+    }
+  ],
+  "specific": [
+    {
+      "statusCode": 403,
+      "title": "Unauthorized access."
+    },
+    {
+      "statusCode": 404,
+      "title": "Page not found."
+    },
+    {
+      "statusCode": 500,
+      "title": "Server-side error occured.",
+      "description": "Whoa there, bud! Looks like she broke when we tried to really give 'er, eh?"
+    }
+  ]
+}

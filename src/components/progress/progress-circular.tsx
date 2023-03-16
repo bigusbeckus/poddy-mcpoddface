@@ -19,7 +19,7 @@ export const ProgressCircular: React.FC<ProgressCircularProps> = ({
   const radius = circleDimension - Math.floor(strokeWidth / 2);
 
   return (
-    <div className="overflow-clip p-1">
+    <div className="overflow-hidden p-1">
       <div className="animate-spin animation-quick">
         <svg
           viewBox="0 0 100 100"

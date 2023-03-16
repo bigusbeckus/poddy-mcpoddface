@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
-import { FC, ReactNode, useState } from "react";
-import { ProgressCircular } from "components/progress/progress-circular";
+import { type FC, type ReactNode, useState } from "react";
+import { ProgressCircular } from "@/components/progress/progress-circular";
 
 type ImageProps = {
   src: string;
@@ -27,21 +27,21 @@ export const FetchedImage: FC<ImageProps> = ({
 
   return (
     <div
-      className={`relative ${fill ? "w-full h-full" : ""} ${
+      className={`relative ${fill ? "h-full w-full" : ""} ${
         wrapperClassName ? wrapperClassName : ""
       }`}
     >
       <img
         src={src}
         alt={alt}
-        className={`${imgClassName} object-cover h-full w-full transition duration-500 ${
+        className={`${imgClassName} h-full w-full object-cover transition duration-500 ${
           loading ? "opacity-0" : ""
         }`}
         onLoad={handleImgLoad}
       />
       {placeholder || (
         <div
-          className={`bg-white/20 absolute top-0 left-0 w-full h-full flex justify-center items-center transition duration-500 ${
+          className={`absolute top-0 left-0 flex h-full w-full items-center justify-center bg-white/20 transition duration-500 ${
             !loading ? "opacity-0" : ""
           }`}
         >

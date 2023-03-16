@@ -1,13 +1,15 @@
+import { logger } from "utils/logger";
 import type { NextApiRequest, NextApiResponse } from "next";
 import axios from "axios";
-import { prisma } from "../../../server/db/client";
-import { ITUNES_PODCAST_LOOKUP_LINK } from "../../../libs/itunes-podcast";
+import { prisma } from "@/server/db/client";
+import { ITUNES_PODCAST_LOOKUP_LINK } from "@/libs/itunes-podcast";
 import { XMLParser } from "fast-xml-parser";
-import { iTunesType, Prisma } from "@prisma/client";
-import { differenceInHours, parse } from "date-fns";
-import { EPISODE_FETCH_LIMIT } from "../../../server/constants/limits";
-import { EPISODE_DEFAULT_ORDER_BY } from "../../../server/constants/order";
-import { parseDurationSeconds } from "../../../libs/util/converters";
+import { iTunesType, type Prisma } from "@prisma/client";
+import { differenceInHours, differenceInMilliseconds, parse } from "date-fns";
+import { EPISODE_FETCH_LIMIT } from "@/server/constants/limits";
+import { EPISODE_DEFAULT_ORDER_BY } from "@/server/constants/order";
+import { parseDurationSeconds } from "@/libs/util/converters";
+import { createHash } from "crypto";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function itemValid(item: any) {
@@ -21,10 +23,31 @@ function itemValid(item: any) {
   );
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getCategories(root: any, maxLevels = 5) {
+  const categories: string[] = [];
+
+  if (root) {
+    if (root.__proto__ === String.prototype) {
+      categories.push(root as string);
+    } else if (root.length > 0 && maxLevels - 1 > 0) {
+      root.forEach((entry: never) => categories.push(...getCategories(entry, maxLevels - 1)));
+    } else {
+      const textProp = root["@_text"];
+      if (textProp) {
+        categories.push(textProp as string);
+      }
+      if (maxLevels - 1 > 0) {
+        categories.push(...getCategories(root["itunes:category"]));
+      }
+    }
+  }
+
+  return categories;
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const startTime = new Date();
   try {
     const { id } = req.body;
     // Ensure id exists
@@ -49,17 +72,18 @@ export default async function handler(
     });
 
     // Respond if entry is found and is not stale
-    if (
-      dbResponse &&
-      differenceInHours(new Date(), dbResponse.createdAt) < 24
-    ) {
+    if (dbResponse && differenceInHours(new Date(), dbResponse.createdAt) < 24) {
+      const endTime = new Date();
+      console.log(
+        `Fetch ${dbResponse.feedTitle} completed in:`,
+        differenceInMilliseconds(endTime, startTime),
+        "ms"
+      );
       return res.status(200).send(dbResponse);
     }
 
     // Lookup podcast if db entry hasn't been found or is stale
-    const lookupResponse = (
-      await axios.get(`${ITUNES_PODCAST_LOOKUP_LINK}&id=${id}`)
-    ).data;
+    const lookupResponse = (await axios.get(`${ITUNES_PODCAST_LOOKUP_LINK}&id=${id}`)).data;
 
     if (!(lookupResponse && lookupResponse.resultCount > 0)) {
       return res.status(404).json({
@@ -145,14 +169,14 @@ export default async function handler(
         guid:
           item["guid"] && item["guid"]["#text"]
             ? item["guid"]["#text"].toString()
-            : undefined,
+            : createHash("sha256")
+                .update(`${item["enclosure"]["@_url"]}-${item["title"]}}-${item["pubDate"] ?? ""}`)
+                .digest("base64"),
         pubDate: item["pubDate"]
           ? parse(
               (() => {
                 const fragments = item["pubDate"].split(" ");
-                return `${fragments
-                  .slice(0, fragments.length - 1)
-                  .join(" ")} +0000`;
+                return `${fragments.slice(0, fragments.length - 1).join(" ")} +0000`;
               })(),
               "E, dd MMM yyyy HH:mm:ss xx",
               new Date()
@@ -163,9 +187,7 @@ export default async function handler(
           ? parseInt(item["itunes:duration"])
           : parseDurationSeconds(item["itunes:duration"]),
         link: item["link"]?.toString(),
-        itunesImage: item["itunes:image"]
-          ? item["itunes:image"]["@_href"]
-          : undefined,
+        itunesImage: item["itunes:image"] ? item["itunes:image"]["@_href"] : undefined,
         itunesExplicit: item["itunes:explicit"] === "yes",
         itunesEpisode: item["itunes:episode"],
         itunesSeason: item["itunes:season"],
@@ -175,57 +197,16 @@ export default async function handler(
       episodeData.push(episode);
     }
 
-    const feedCategories =
-      channel["itunes:category"].length > 1
-        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          channel["itunes:category"].map((category: any) =>
-            category["itunes:category"]
-              ? {
-                  where: {
-                    text: category["itunes:category"]["@_text"],
-                  },
-                  create: {
-                    text: category["itunes:category"]["@_text"],
-                  },
-                }
-              : {
-                  where: {
-                    text: category["@_text"],
-                  },
-                  create: {
-                    text: category["@_text"],
-                  },
-                }
-          )
-        : channel["itunes:category"]["itunes:category"]
-        ? [
-            {
-              where: {
-                text: channel["itunes:category"]["@_text"],
-              },
-              create: {
-                text: channel["itunes:category"]["@_text"],
-              },
-            },
-            {
-              where: {
-                text: channel["itunes:category"]["itunes:category"]["@_text"],
-              },
-              create: {
-                text: channel["itunes:category"]["itunes:category"]["@_text"],
-              },
-            },
-          ]
-        : [
-            {
-              where: {
-                text: channel["itunes:category"]["@_text"],
-              },
-              create: {
-                text: channel["itunes:category"]["@_text"],
-              },
-            },
-          ];
+    const feedCategories = [...new Set<string>(getCategories(channel["itunes:category"]))].map(
+      (category) => ({
+        where: {
+          text: category,
+        },
+        create: {
+          text: category,
+        },
+      })
+    );
 
     const podcast = await prisma.podcast.upsert({
       create: {
@@ -243,18 +224,6 @@ export default async function handler(
       update: {
         ...podcastData,
         episodes: {
-          // createMany: {
-          //   data: episodeData,
-          //   // skipDuplicates: true,
-          // },
-          // connectOrCreate: episodeData,
-          // upsert: {
-          //   create: episodeData,
-          //   update: episodeData,
-          //   where: {
-          //     guid: episodeData.g
-          //   }
-          // }
           upsert: episodeData.map(
             (episode) =>
               ({
@@ -290,9 +259,16 @@ export default async function handler(
       },
     });
 
+    const endTime = new Date();
+    console.log(
+      `Fetch ${podcast.feedTitle} completed in:`,
+      differenceInMilliseconds(endTime, startTime),
+      "ms"
+    );
+
     return res.status(200).send(podcast);
   } catch (error) {
-    console.error(error);
+    logger.error(error instanceof Error ? error.message : JSON.stringify(error));
     return res.status(400).json({
       message: "Podcast lookup failed",
       error: error ? error : "LOOKUP_ERROR",

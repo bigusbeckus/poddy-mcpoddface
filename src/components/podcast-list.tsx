@@ -2,7 +2,7 @@
 // import { Modal } from "./modal";
 import Link from "next/link";
 import React from "react";
-import { PodcastSearchResult } from "libs/itunes-podcast";
+import type { PodcastSearchResult } from "@/libs/itunes-podcast";
 import { FetchedImage } from "components/image";
 import { PodcastThumb } from "components/podcast-thumb";
 
@@ -60,11 +60,13 @@ export const PodcastList: React.FC<PodcastListProps> = ({ podcasts, view }) => {
               key={result.collectionId}
               href={{
                 pathname: `/podcast/${result.collectionId}`,
-              }}>
+              }}
+            >
               <div
                 key={result.collectionId}
                 // onClick={() => handleItemClick(result)}
-                className="h-32 flex hover:bg-background_light/20 hover:dark:bg-background_dark/20 p-1 cursor-pointer rounded-md transition duration-300">
+                className="flex h-32 cursor-pointer rounded-md p-1 transition duration-300 hover:bg-background_light/20 hover:dark:bg-background_dark/20"
+              >
                 {/* <img
                 src={result.artworkUrl600}
                 className="h-full rounded-md col-auto"
@@ -77,16 +79,13 @@ export const PodcastList: React.FC<PodcastListProps> = ({ podcasts, view }) => {
                 <div className="p-2">
                   <h3 className="text-xl font-extrabold">
                     {result.collectionName}
-                    {`${
-                      result.trackExplicitness === "explicit"
-                        ? " (Explicit)"
-                        : ""
-                    }`}
+                    {`${result.trackExplicitness === "explicit" ? " (Explicit)" : ""}`}
                   </h3>
                   <a
                     className="hover:underline"
                     href={result.artistViewUrl}
-                    onClick={(e) => e.stopPropagation()}>
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {result.artistName}
                   </a>
                   {/* <Link href={result.artistViewUrl}>

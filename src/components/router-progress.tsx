@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
-import { randomFromRange } from "libs/util/number";
+import { randomFromRange } from "@/libs/util/number";
 // import { Button } from "components/button";
 
 const progressBarSteps = [
@@ -25,10 +25,7 @@ type RouterProgresProps = {
 
 type RouterState = "loading" | "error" | "loaded" | "none";
 
-export const RouterProgres: React.FC<RouterProgresProps> = ({
-  className,
-  isErrorPage,
-}) => {
+export const RouterProgres: React.FC<RouterProgresProps> = ({ className, isErrorPage }) => {
   const router = useRouter();
   const [routerState, setRouterState] = useState<RouterState>("none");
 
@@ -83,13 +80,13 @@ export const RouterProgres: React.FC<RouterProgresProps> = ({
   }, [routerState, progressBarCurrentStep]);
 
   useEffect(() => {
-    const handleStart = (url: string) => {
+    const handleStart = (_url: string) => {
       setRouterState("loading");
     };
-    const handleStop = (url: string) => {
+    const handleStop = (_url: string) => {
       setRouterState("loaded");
     };
-    const handleError = (url: string) => {
+    const handleError = (_url: string) => {
       setRouterState("error");
     };
 
@@ -108,7 +105,7 @@ export const RouterProgres: React.FC<RouterProgresProps> = ({
     <div ref={loaderWrapper} className="absolute h-0.5 w-full bg-transparent">
       <div
         ref={loaderProgress}
-        className={`${_className} h-full bg-green-500 dark:bg-white rounded-r-md transition-all duration-700`}
+        className={`${_className} h-full rounded-r-md bg-green-500 transition-all duration-700 dark:bg-white`}
       ></div>
       {/*
       TODO: Put buttons behind a feature flag

@@ -1,7 +1,7 @@
 import Head from "next/head";
-import { NextPage } from "next/types";
-import { ReactElement, ReactNode } from "react";
-import { RouterProgres } from "components/router-progress";
+import type { NextPage } from "next/types";
+import type { ReactElement, ReactNode } from "react";
+import { RouterProgres } from "@/components/router-progress";
 
 type RootLayoutProps = {
   children?: React.ReactNode;
@@ -9,14 +9,10 @@ type RootLayoutProps = {
   description?: string;
 };
 
-const defaultTitle = "Poddy McPodface | Podcasts Everywhere";
+const defaultTitle = "Poddy McPodface - Podcasts Everywhere";
 const defaultDescription = "Cross-platform podcasts for free";
 
-export const RootLayout: React.FC<RootLayoutProps> = ({
-  children,
-  title,
-  description,
-}) => {
+export const RootLayout: React.FC<RootLayoutProps> = ({ children, title, description }) => {
   return (
     <>
       <Head>
@@ -24,7 +20,7 @@ export const RootLayout: React.FC<RootLayoutProps> = ({
         <meta name="description" content={description ?? defaultDescription} />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="h-full overflow-hidden dark:bg-black/40 dark:text-inherit bg-white text-black dark:text-white">
+      <div className="h-full overflow-hidden bg-white text-black dark:bg-black/40 dark:text-inherit dark:text-white">
         <RouterProgres />
         {children}
       </div>
@@ -32,9 +28,6 @@ export const RootLayout: React.FC<RootLayoutProps> = ({
   );
 };
 
-export type NextPageWithRootLayout<
-  P = Record<string, unknown>,
-  IP = P
-> = NextPage<P, IP> & {
+export type NextPageWithRootLayout<P = Record<string, unknown>, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };

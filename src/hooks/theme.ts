@@ -68,37 +68,24 @@ export const useTheme = () => {
 export const useSystemThemeChangeListener = () => {
   const [theme, setTheme] = useTheme();
 
-  // const handleSystemThemeChange = useCallback(() => {
-  //   setTheme("system");
-  // }, []);
-
   useEffect(() => {
     console.log("mount", theme.mode);
     const loadedTheme = localStorage.getItem(THEME_STORAGE_KEY);
     console.log("loaded: ", loadedTheme);
     if (loadedTheme) {
       // Manually set theme
-      console.log(
-        "setLoaded: ",
-        loadedTheme !== LIGHT_THEME_ENTRY ? "dark" : "light"
-      );
+      console.log("setLoaded: ", loadedTheme !== LIGHT_THEME_ENTRY ? "dark" : "light");
       setTheme(loadedTheme !== LIGHT_THEME_ENTRY ? "dark" : "light");
     } else {
       // Respect system preferences
       const systemThemeMediaQuery = window.matchMedia(PREFERS_DARK_MEDIA_QUERY);
       const handleSystemThemeChange = () => setTheme("system");
-      console.log(
-        "setDefault: system,",
-        systemThemeMediaQuery.matches ? "dark" : "light"
-      );
+      console.log("setDefault: system,", systemThemeMediaQuery.matches ? "dark" : "light");
       setTheme("system");
       systemThemeMediaQuery.addEventListener("change", handleSystemThemeChange);
 
-      return () =>
-        systemThemeMediaQuery.removeEventListener(
-          "change",
-          handleSystemThemeChange
-        );
+      return () => systemThemeMediaQuery.removeEventListener("change", handleSystemThemeChange);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 };

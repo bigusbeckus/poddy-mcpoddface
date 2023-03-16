@@ -1,6 +1,7 @@
-/** @type {import('tailwindcss').Config} */
+/* eslint-disable @typescript-eslint/no-var-requires */
 const colors = require("tailwindcss/colors");
 
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   darkMode: "class",
@@ -15,6 +16,8 @@ module.exports = {
         background_light: colors.black,
         card_light: colors.gray,
         primary_light: colors.gray,
+        // Gray fix
+        gray: colors.neutral,
       },
     },
   },
