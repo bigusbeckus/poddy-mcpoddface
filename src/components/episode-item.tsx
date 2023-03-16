@@ -85,8 +85,8 @@ export const EpisodeItem: React.FC<EpisodeItemProps> = (props) => {
               onClick={handleThumbClick}
             >
               <div
-                className={`flex items-center justify-center rounded-full shadow-black/70 outline outline-1 outline-white/10 backdrop-blur-sm transition-all ${
-                  isThumbHovered ? "bg-black/50 p-4" : "bg-black/40 p-3"
+                className={`flex items-center justify-center rounded-full p-4 shadow-black/70 outline outline-1 outline-white/10 backdrop-blur-sm transition-all ${
+                  isThumbHovered ? "bg-black/50" : "bg-black/40"
                 }`}
               >
                 {isCurrentlyPlaying ? (
