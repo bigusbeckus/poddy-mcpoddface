@@ -74,27 +74,17 @@ export const useSystemThemeChangeListener = () => {
     console.log("loaded: ", loadedTheme);
     if (loadedTheme) {
       // Manually set theme
-      console.log(
-        "setLoaded: ",
-        loadedTheme !== LIGHT_THEME_ENTRY ? "dark" : "light"
-      );
+      console.log("setLoaded: ", loadedTheme !== LIGHT_THEME_ENTRY ? "dark" : "light");
       setTheme(loadedTheme !== LIGHT_THEME_ENTRY ? "dark" : "light");
     } else {
       // Respect system preferences
       const systemThemeMediaQuery = window.matchMedia(PREFERS_DARK_MEDIA_QUERY);
       const handleSystemThemeChange = () => setTheme("system");
-      console.log(
-        "setDefault: system,",
-        systemThemeMediaQuery.matches ? "dark" : "light"
-      );
+      console.log("setDefault: system,", systemThemeMediaQuery.matches ? "dark" : "light");
       setTheme("system");
       systemThemeMediaQuery.addEventListener("change", handleSystemThemeChange);
 
-      return () =>
-        systemThemeMediaQuery.removeEventListener(
-          "change",
-          handleSystemThemeChange
-        );
+      return () => systemThemeMediaQuery.removeEventListener("change", handleSystemThemeChange);
     }
-  }, []);
+  }, [theme.mode, setTheme]);
 };

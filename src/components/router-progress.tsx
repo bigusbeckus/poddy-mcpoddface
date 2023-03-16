@@ -79,13 +79,13 @@ export const RouterProgres: React.FC<RouterProgresProps> = ({ className, isError
   }, [routerState, progressBarCurrentStep]);
 
   useEffect(() => {
-    const handleStart = (url: string) => {
+    const handleStart = (_url: string) => {
       setRouterState("loading");
     };
-    const handleStop = (url: string) => {
+    const handleStop = (_url: string) => {
       setRouterState("loaded");
     };
-    const handleError = (url: string) => {
+    const handleError = (_url: string) => {
       setRouterState("error");
     };
 

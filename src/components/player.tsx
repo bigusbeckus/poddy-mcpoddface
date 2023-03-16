@@ -188,18 +188,6 @@ export function usePlayback() {
     return audioElement.volume === 0;
   }
 
-  function isPlaying() {
-    if (!audioElement) {
-      return false;
-    }
-
-    return (
-      !!audioElement.currentSrc &&
-      !(audioElement.paused || audioElement.ended) &&
-      audioElement.readyState > 2
-    );
-  }
-
   return {
     setTrack,
     clearSource,
