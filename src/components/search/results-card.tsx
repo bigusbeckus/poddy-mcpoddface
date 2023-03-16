@@ -2,14 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { atom, useAtom } from "jotai";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ChangeEvent, FocusEvent, FormEvent, useState } from "react";
+import { type ChangeEvent, type FocusEvent, type FormEvent, useState } from "react";
 import { Search } from "react-feather";
-import { useDebounce } from "hooks/debounce";
-import { useRecentSearches } from "hooks/recent-searches";
-import { podcastSearchLink } from "libs/itunes-podcast";
-import { ProgressCircular } from "components/progress/progress-circular";
-import { RecentSearchItemCard } from "./recent-item";
-import { SearchResultItem } from "./results-item";
+import { useDebounce } from "@/hooks/debounce";
+import { useRecentSearches } from "@/hooks/recent-searches";
+import { podcastSearchLink } from "@/libs/itunes-podcast";
+import { ProgressCircular } from "@/components/progress/progress-circular";
+import { RecentSearchItemCard } from "@/components/search/recent-item";
+import { SearchResultItem } from "@/components/search/results-item";
 
 type SearchResultsCardProps = {
   className?: string;

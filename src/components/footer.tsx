@@ -1,7 +1,7 @@
 import { Listbox, Transition } from "@headlessui/react";
 import React, { Fragment } from "react";
 import { Monitor, Moon, Sun } from "react-feather";
-import { AppThemeMode, useTheme } from "hooks/theme";
+import { type AppThemeMode, useTheme } from "@/hooks/theme";
 
 const themes: AppThemeMode[] = ["system", "dark", "light"];
 

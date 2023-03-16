@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { NextPage } from "next";
+import type { NextPage } from "next";
 import { useState } from "react";
-import { SearchResultsCard } from "components/search/results-card";
-import { DefaultFooter } from "components/footer";
-import { AnimatedLayout } from "layouts/animated";
+import { SearchResultsCard } from "@/components/search/results-card";
+import { DefaultFooter } from "@/components/footer";
+import { AnimatedLayout } from "@/layouts/animated";
 
 const NuHome: NextPage = () => {
   const [searchCardShown, setSearchCardShown] = useState(false);

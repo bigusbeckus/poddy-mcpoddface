@@ -3,13 +3,8 @@ import { useState } from "react";
 type DebounceParams = { lastInvoked: number; executeHandler: NodeJS.Timeout };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function useDebounce<T extends (...args: any[]) => any>(
-  fn: T,
-  debounceMs = 500
-): T {
-  const [debounceParams, setDebounceParams] = useState<
-    DebounceParams | undefined
-  >();
+export function useDebounce<T extends (...args: any[]) => any>(fn: T, debounceMs = 500): T {
+  const [debounceParams, setDebounceParams] = useState<DebounceParams | undefined>();
 
   const [fnReturn, setFnReturn] = useState<ReturnType<T>>();
 

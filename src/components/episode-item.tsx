@@ -1,9 +1,9 @@
 import { FetchedImage } from "components/image";
-import React, { MouseEvent, useState } from "react";
-import { PodcastDescription } from "./podcast-description";
-import { getDurationString } from "libs/util/converters";
+import React, { type MouseEvent, useState } from "react";
+import { PodcastDescription } from "@/components/podcast-description";
+import { getDurationString } from "@/libs/util/converters";
 import { Pause, Play } from "react-feather";
-import { usePlayback } from "./player";
+import { usePlayback } from "@/components/player";
 
 type EpisodeItemProps = {
   title: string;

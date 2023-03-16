@@ -1,14 +1,14 @@
 import { logger } from "utils/logger";
 import type { NextApiRequest, NextApiResponse } from "next";
 import axios from "axios";
-import { prisma } from "../../../server/db/client";
-import { ITUNES_PODCAST_LOOKUP_LINK } from "../../../libs/itunes-podcast";
+import { prisma } from "@/server/db/client";
+import { ITUNES_PODCAST_LOOKUP_LINK } from "@/libs/itunes-podcast";
 import { XMLParser } from "fast-xml-parser";
 import { iTunesType, type Prisma } from "@prisma/client";
 import { differenceInHours, parse } from "date-fns";
-import { EPISODE_FETCH_LIMIT } from "../../../server/constants/limits";
-import { EPISODE_DEFAULT_ORDER_BY } from "../../../server/constants/order";
-import { parseDurationSeconds } from "../../../libs/util/converters";
+import { EPISODE_FETCH_LIMIT } from "@/server/constants/limits";
+import { EPISODE_DEFAULT_ORDER_BY } from "@/server/constants/order";
+import { parseDurationSeconds } from "@/libs/util/converters";
 import { createHash } from "crypto";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

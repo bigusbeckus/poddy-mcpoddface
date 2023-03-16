@@ -68,10 +68,6 @@ export const useTheme = () => {
 export const useSystemThemeChangeListener = () => {
   const [theme, setTheme] = useTheme();
 
-  // const handleSystemThemeChange = useCallback(() => {
-  //   setTheme("system");
-  // }, []);
-
   useEffect(() => {
     console.log("mount", theme.mode);
     const loadedTheme = localStorage.getItem(THEME_STORAGE_KEY);

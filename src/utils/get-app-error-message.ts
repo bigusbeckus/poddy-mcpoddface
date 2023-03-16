@@ -1,5 +1,5 @@
 // import errorMessages from "@/data/error-messages.json";
-import errorMessages from "../data/error-messages.json";
+import errorMessages from "@/data/error-messages.json";
 type CustomErrorMessage = {
   title: string;
   description: string;

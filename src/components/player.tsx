@@ -2,7 +2,7 @@ import { atom, useAtom } from "jotai";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pause, Play, RotateCcw, RotateCw, SkipBack, SkipForward } from "react-feather";
-import { FetchedImage } from "./image";
+import { FetchedImage } from "@/components/image";
 
 type Media = {
   track: {
@@ -53,19 +53,29 @@ export function usePlayback() {
   const [playbackState, setPlaybackState] = useAtom(playbackStateAtom);
   // const [media, setMedia] = useState(undefined as Media | undefined);
   const [audioElement] = useAtom(audioElementAtom);
+
   const [bufferedTime, setBufferedTime] = useState(0);
-  const setCurrentTime = useAtom(currentTimeAtom)[1];
 
   const currentTime = useRef(0);
+  const setCurrentTime = useAtom(currentTimeAtom)[1];
+
   const timeUpdateInterval = useRef(undefined as NodeJS.Timer | undefined);
 
   const handleOnPlay = useCallback((e: Event) => {
     console.log(e);
   }, []);
 
-  const handleProgress = useCallback((e: ProgressEvent) => {
-    setBufferedTime((e.target as HTMLAudioElement).buffered.end(0));
-  }, []);
+  const handleProgress = useCallback(() => {
+    // setBufferedTime((e.target as HTMLAudioElement).buffered.end(0));
+    if (!audioElement) {
+      return;
+    }
+    try {
+      setBufferedTime(audioElement.buffered.end(audioElement.buffered.length - 1));
+    } catch (error) {
+      setBufferedTime(currentTime.current);
+    }
+  }, [audioElement, setBufferedTime]);
 
   const handleTimeUpdate = useCallback((e: Event) => {
     currentTime.current = (e.target as HTMLAudioElement).currentTime;

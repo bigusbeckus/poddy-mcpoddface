@@ -1,11 +1,16 @@
-import "styles/globals.css";
+import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { NextPageWithRootLayout, RootLayout } from "layouts/root";
+import { type NextPageWithRootLayout, RootLayout } from "@/layouts/root";
 import { useState } from "react";
-import { DehydratedState, Hydrate, QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useSystemThemeChangeListener } from "hooks/theme";
+import {
+  type DehydratedState,
+  Hydrate,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import { useSystemThemeChangeListener } from "@/hooks/theme";
 import { AnimatePresence, LazyMotion, domAnimation } from "framer-motion";
-import { Player } from "components/player";
+import { Player } from "@/components/player";
 
 type AppPropsWithRootLayout = AppProps<{
   dehydratedState?: DehydratedState;

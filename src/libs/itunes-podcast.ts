@@ -1,13 +1,10 @@
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import axios from "axios";
-import { clampInt } from "libs/util/number";
+import { clampInt } from "@/libs/util/number";
 
-export const ITUNES_PODCAST_SEARCH_LINK =
-  "https://itunes.apple.com/search?media=podcast";
-export const ITUNES_PODCAST_LOOKUP_LINK =
-  "https://itunes.apple.com/lookup?entity=podcast";
-export const ITUNES_RSS_FEED_LINK =
-  "https://rss.applemarketingtools.com/api/v2";
+export const ITUNES_PODCAST_SEARCH_LINK = "https://itunes.apple.com/search?media=podcast";
+export const ITUNES_PODCAST_LOOKUP_LINK = "https://itunes.apple.com/lookup?entity=podcast";
+export const ITUNES_RSS_FEED_LINK = "https://rss.applemarketingtools.com/api/v2";
 
 export type PodcastSearchResult = {
   wrapperType: string;
@@ -114,9 +111,7 @@ export function podcastFeedLink() {
       linkEnd = "podcasts.json";
     }
 
-    const link = `${ITUNES_RSS_FEED_LINK}/${
-      _country ? _country : "gb"
-    }/podcasts/${
+    const link = `${ITUNES_RSS_FEED_LINK}/${_country ? _country : "gb"}/podcasts/${
       _type === FeedType.topSubscriber ? "top-subscriber" : "top"
     }/${_limit}/${linkEnd}`;
 
@@ -124,8 +119,7 @@ export function podcastFeedLink() {
   }
 
   async function fetch() {
-    const { title, country, updated, results } = (await axios.get(getLink()))
-      .data.feed;
+    const { title, country, updated, results } = (await axios.get(getLink())).data.feed;
     const feedResults = [];
     if (results) {
       for (const result of results) {
@@ -288,13 +282,7 @@ export async function getFeed(lookupId: number): Promise<
   ).data;
 }
 
-export function getLookupLink({
-  prop,
-  value,
-}: {
-  prop?: string;
-  value: string;
-}) {
+export function getLookupLink({ prop, value }: { prop?: string; value: string }) {
   // TODO: Maybe use zod for validation here?
   const lookupProp = prop ?? "id";
   return `${ITUNES_PODCAST_LOOKUP_LINK}${lookupProp}=${value}`;
@@ -307,9 +295,5 @@ export async function lookupPodcast({
   lookupId: string;
   lookupType?: string;
 }): Promise<SearchReturn> {
-  return (
-    await axios.get(
-      `${ITUNES_PODCAST_LOOKUP_LINK}&${lookupType ?? "id"}=${lookupId}`
-    )
-  ).data;
+  return (await axios.get(`${ITUNES_PODCAST_LOOKUP_LINK}&${lookupType ?? "id"}=${lookupId}`)).data;
 }

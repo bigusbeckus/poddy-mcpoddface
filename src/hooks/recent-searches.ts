@@ -64,10 +64,7 @@ export function useRecentSearches() {
       ),
     ]; // Ensure a maximum of `RECENT_SEARCH_ITEMS_COUNT` items are kept
     setRecentSearches(updatedRecentSearches);
-    localStorage.setItem(
-      RECENT_SEARCHES_KEY,
-      JSON.stringify(updatedRecentSearches)
-    );
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updatedRecentSearches));
   };
 
   const clearRecentSearches = () => {
