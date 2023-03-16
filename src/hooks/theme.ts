@@ -86,5 +86,6 @@ export const useSystemThemeChangeListener = () => {
 
       return () => systemThemeMediaQuery.removeEventListener("change", handleSystemThemeChange);
     }
-  }, [theme.mode, setTheme]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 };
