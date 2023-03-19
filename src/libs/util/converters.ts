@@ -60,7 +60,8 @@ type DurationHms = {
 };
 
 type FormatHmsDurationOptions = {
-  omitZeroes?: Array<keyof DurationHms>;
+  omitIfZero?: Array<keyof DurationHms>;
+  noZeroPadding?: Array<keyof DurationHms>;
 };
 
 export function secondsToHms(duration: number) {
@@ -79,9 +80,17 @@ export function formatHmsDuration(duration: DurationHms, options?: FormatHmsDura
   const values: string[] = [];
   let key: keyof DurationHms;
   for (key in duration) {
-    if (!options?.omitZeroes?.includes(key)) {
-      values.push(duration[key].toString().padStart(2, "0"));
+    // if is zero and the key is in omitIfZero, skip
+    // else, accept
+    if (duration[key] === 0 && options?.omitIfZero?.includes(key)) {
+      continue;
     }
+
+    values.push(
+      options?.noZeroPadding?.includes(key)
+        ? duration[key].toString()
+        : duration[key].toString().padStart(2, "0")
+    );
   }
   return values.join(":");
 }

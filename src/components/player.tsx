@@ -30,7 +30,15 @@ export const currentTimeAtom = atom(0);
 
 const playbackStateAtom = atom("none" as PlaybackState);
 
-type PlaybackState = "playing" | "paused" | "stopped" | "none";
+type PlaybackState =
+  | "buffering"
+  | "playing"
+  | "paused"
+  | "stopped"
+  | "aborted"
+  | "error"
+  | "seeking"
+  | "none";
 type PlaybackAction = {
   type: "play" | "stop" | "pause" | "clear";
 };
@@ -49,25 +57,40 @@ function playbackReducer(state: PlaybackState, action: PlaybackAction) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function logPlayerEvent(event: string, ...details: any[]) {
+  if (details) {
+    console.log("Player event:", event, ...details);
+  } else {
+    console.log("Player event:", event);
+  }
+}
+
 export function usePlayback() {
   const [media, setMedia] = useAtom(mediaAtom);
   // const [playbackState, setPlaybackState] = useState("none" as PlaybackState);
   const [playbackState, setPlaybackState] = useAtom(playbackStateAtom);
+  const [beforeSeekPlaybackState, setBeforeSeekPlaybackState] = useState(playbackState);
   // const [media, setMedia] = useState(undefined as Media | undefined);
   const [audioElement] = useAtom(audioElementAtom);
 
   const [bufferedTime, setBufferedTime] = useState(0);
 
   const currentTime = useRef(0);
-  const setCurrentTime = useAtom(currentTimeAtom)[1];
+  const [currentTimeState, setCurrentTimeState] = useState(currentTime.current);
 
-  const timeUpdateInterval = useRef(undefined as NodeJS.Timer | undefined);
+  const setCurrentTime = useCallback((time: number) => {
+    currentTime.current = time;
+    setCurrentTimeState(time);
+  }, []);
 
-  const handleOnPlay = useCallback((e: Event) => {
-    console.log(e);
+  const handlePlay = useCallback((e: Event) => {
+    logPlayerEvent("play");
+    // console.log(e);
   }, []);
 
   const handleProgress = useCallback(() => {
+    logPlayerEvent("progress");
     // setBufferedTime((e.target as HTMLAudioElement).buffered.end(0));
     if (!audioElement) {
       return;
@@ -77,39 +100,73 @@ export function usePlayback() {
     } catch (error) {
       setBufferedTime(currentTime.current);
     }
-  }, [audioElement, setBufferedTime]);
+  }, [audioElement]);
 
-  const handleTimeUpdate = useCallback((e: Event) => {
-    currentTime.current = (e.target as HTMLAudioElement).currentTime;
-  }, []);
+  const handleTimeUpdate = useCallback(
+    (e: Event) => {
+      logPlayerEvent(
+        "timeupdate",
+        "currentTime:",
+        (e.target as HTMLAudioElement).currentTime,
+        "currentTime (state):",
+        currentTime.current
+        // "duration:",
+        // audioElement?.duration
+      );
+      if (playbackState !== "seeking") {
+        setCurrentTime((e.target as HTMLAudioElement).currentTime);
+      }
+    },
+    [playbackState, setCurrentTime]
+  );
 
-  const timeUpdateIntervalHandler = useCallback(() => {
-    if (audioElement && playbackState === "playing") {
-      setCurrentTime(currentTime.current);
-    }
-  }, [audioElement, playbackState, setCurrentTime]);
+  const handleSeeking = useCallback(() => {
+    logPlayerEvent(
+      "seeking",
+      "playbackState:",
+      playbackState,
+      "beforeSeekPlaybackState",
+      beforeSeekPlaybackState
+    );
+    const prev = playbackState;
+    setPlaybackState("seeking");
+    setBeforeSeekPlaybackState(prev);
+  }, [playbackState, setPlaybackState, beforeSeekPlaybackState]);
+
+  const handleSeeked = useCallback(
+    (e: Event) => {
+      logPlayerEvent(
+        "seeked",
+        "playbackState:",
+        playbackState,
+        "beforeSeekPlaybackState:",
+        beforeSeekPlaybackState,
+        "currentTime):",
+        (e.target as HTMLAudioElement).currentTime,
+        "currentTime (state):",
+        currentTime.current
+      );
+      setPlaybackState(beforeSeekPlaybackState);
+      setCurrentTime((e.target as HTMLAudioElement).currentTime);
+    },
+    [setPlaybackState, beforeSeekPlaybackState, playbackState, setCurrentTime]
+  );
 
   useEffect(() => {
-    audioElement?.addEventListener("play", handleOnPlay);
+    audioElement?.addEventListener("play", handlePlay);
     audioElement?.addEventListener("progress", handleProgress);
     audioElement?.addEventListener("timeupdate", handleTimeUpdate);
-
-    timeUpdateInterval.current = setInterval(timeUpdateIntervalHandler, 500);
+    audioElement?.addEventListener("seeking", handleSeeking);
+    audioElement?.addEventListener("seeked", handleSeeked);
 
     return () => {
-      audioElement?.removeEventListener("play", handleOnPlay);
+      audioElement?.removeEventListener("play", handlePlay);
       audioElement?.removeEventListener("progress", handleProgress);
       audioElement?.removeEventListener("timeupdate", handleTimeUpdate);
-      clearInterval(timeUpdateInterval.current);
+      audioElement?.removeEventListener("seeking", handleSeeking);
+      audioElement?.removeEventListener("seeked", handleSeeked);
     };
-  }, [
-    audioElement,
-    handleOnPlay,
-    handleProgress,
-    handleTimeUpdate,
-    timeUpdateInterval,
-    timeUpdateIntervalHandler,
-  ]);
+  }, [audioElement, handlePlay, handleProgress, handleTimeUpdate, handleSeeking, handleSeeked]);
 
   async function setTrack(media: Media) {
     if (!audioElement) {
@@ -124,7 +181,9 @@ export function usePlayback() {
     audioElement.load();
     setMedia(media);
     setBufferedTime(0);
+    setCurrentTime(0);
     setPlaybackState("playing");
+    return true;
   }
 
   function play() {
@@ -156,30 +215,34 @@ export function usePlayback() {
     // Pause currently playing track and reset position
     audioElement.pause();
     audioElement.currentTime = 0;
+    setCurrentTime(0);
     setPlaybackState("stopped");
     return true;
   }
 
   function skipForward(offset: number) {
     if (audioElement) {
-      seek(audioElement.currentTime + offset);
+      return seek(audioElement.currentTime + offset);
     }
+    return false;
   }
 
   function skipBackward(offset: number) {
     if (audioElement) {
-      seek(audioElement.currentTime - offset);
+      return seek(audioElement.currentTime - offset);
     }
+    return false;
   }
 
   function seek(timestamp: number) {
-    console.log("seekfn");
-    if (!(media && audioElement)) {
-      // No media to seek, do nothing
+    if (!media || !audioElement || isNaN(audioElement.duration)) {
+      // No media or duration hasn't been detrmined yet, do nothing
       return false;
     }
-    console.log(audioElement);
+    // Set current time
     audioElement.currentTime = Math.min(audioElement.duration, Math.max(0, timestamp));
+    setCurrentTime(audioElement.currentTime);
+    return true;
   }
 
   function clearSource() {
@@ -190,6 +253,9 @@ export function usePlayback() {
     audioElement.load();
     setMedia(undefined);
     setPlaybackState("none");
+    setBufferedTime(0);
+    setCurrentTime(0);
+    return true;
   }
 
   function setVolume() {
@@ -211,11 +277,10 @@ export function usePlayback() {
       media: useAtom(mediaAtom)[0],
       element: {
         playbackState: useAtom(playbackStateAtom)[0],
-        currentTime: useAtom(currentTimeAtom)[0],
+        currentTime: currentTimeState,
         bufferedTime,
         duration: audioElement?.duration,
       },
-      // media,
       isMuted: useState(isMuted())[0],
       // isPlaying: useState(isPlaying())[0],
       controls: {
@@ -237,42 +302,57 @@ function PlayerProgress() {
   const bufferedTime = playback.current.element.bufferedTime;
   const currentTime = playback.current.element.currentTime;
 
+  const [sliderTargetValue, setSliderTargetValue] = useState(currentTime);
+
   const durationString = duration
-    ? formatHmsDuration(secondsToHms(duration), { omitZeroes: ["hours"] })
+    ? formatHmsDuration(secondsToHms(duration), { omitIfZero: ["hours"], noZeroPadding: ["hours"] })
     : "0:00";
   const currentTimeString = duration
-    ? formatHmsDuration(secondsToHms(currentTime), { omitZeroes: ["hours"] })
+    ? formatHmsDuration(secondsToHms(currentTime), {
+      omitIfZero: ["hours"],
+      noZeroPadding: ["hours"],
+    })
     : "0:00";
+
   const bufferSizePercent = useMemo(
     () => (duration && duration > 0 ? (bufferedTime / duration) * 100 : 0),
     [duration, bufferedTime]
   );
-
-  const playbackPercent = useMemo(
-    () => (duration && duration > 0 ? (currentTime / duration) * 100 : 0),
-    [duration, currentTime]
-  );
+  // const playbackPercent = useMemo(
+  //   () => (duration && duration > 0 ? (Math.floor(currentTime) / duration) * 100 : 0),
+  //   [duration, currentTime]
+  // );
 
   function onSliderValueChanged(values: number[]) {
     const sliderValue = values[0];
-    // console.log(sliderValue);
+    setSliderTargetValue(sliderValue);
     playback.current.controls.seek(sliderValue);
   }
 
   function onSliderValueCommit(values: number[]) {
     const sliderValue = values[0];
-    // console.log(sliderValue);
+    console.log("Slider event:", "slidervaluecommit", sliderValue);
   }
 
   return (
     <div className="flex w-full items-center">
-      <div className="h-full w-16 pr-2 text-xs text-gray-300">{currentTimeString}</div>
+      <div className="h-full w-16 overflow-y-scroll pr-2 text-xs text-gray-300">
+        {currentTimeString}
+      </div>
       <Slider.Root
         className="relative flex h-full grow touch-none select-none items-center"
         aria-label="Playback progress"
         defaultValue={[0]}
-        max={duration}
-        value={[currentTime]}
+        step={1}
+        max={duration ? Math.floor(duration) : 0}
+        value={[
+          Math.min(
+            duration ? Math.floor(duration) : 0,
+            playback.current.element.playbackState === "seeking"
+              ? sliderTargetValue
+              : Math.floor(currentTime)
+          ),
+        ]}
         onValueChange={onSliderValueChanged}
         onValueCommit={onSliderValueCommit}
       >
@@ -281,10 +361,7 @@ function PlayerProgress() {
             className="absolute h-full rounded-full bg-gray-600"
             style={{ width: `${bufferSizePercent}%` }}
           />
-          <Slider.Range
-            className="absolute h-full rounded-l-full bg-green-400"
-            // style={{ left: duration ? `${playbackPercent}%` : 0 }}
-          />
+          <Slider.Range className="absolute h-full rounded-l-full bg-green-400" />
         </Slider.Track>
         <Slider.Thumb className="block h-4 w-4 rounded-full bg-white shadow-md shadow-black/70 hover:shadow-md hover:outline-none focus:outline-none active:outline-none" />
       </Slider.Root>
@@ -301,7 +378,7 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
 
   useEffect(() => {
     setAudioElement(audioElementRef.current);
-    console.log(audioElementRef);
+    // console.log(audioElementRef);
   }, [setAudioElement]);
 
   function handlePlaybackToggle() {
@@ -327,9 +404,8 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
 
   return (
     <div
-      className={`${!!playback.current.media || expand ? "" : "h-0"} ${
-        className ?? ""
-      } bottom-0 z-50 overflow-hidden rounded-t-md bg-gray-900 p-2 outline outline-1 outline-white/10 transition-all`}
+      className={`${!!playback.current.media || expand ? "" : "h-0"} ${className ?? ""
+        } bottom-0 z-50 overflow-hidden rounded-t-md bg-gray-900 p-2 outline outline-1 outline-white/10 transition-all`}
     >
       <audio ref={audioElementRef} autoPlay playsInline preload="none" />
       <div className="flex h-32">
@@ -388,66 +464,40 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
                 <SkipForward size={20} className="fill-white" />
               </button>
               {/* Debug info */}
-              {/* <div className="fixed bottom-0 right-0 z-50 w-52 bg-black/30 p-4"> */}
-              {/*   <div> */}
-              {/*     Duration:{" "} */}
-              {/*     {playback.current.element.duration */}
-              {/*       ? playback.current.element.duration.toFixed(2) */}
-              {/*       : 0} */}
-              {/*   </div> */}
-              {/*   <div>Current: {playback.current.element.currentTime.toFixed(2)}</div> */}
-              {/*   <div>Buffered: {playback.current.element.bufferedTime.toFixed(2)}</div> */}
-              {/*   <div> */}
-              {/*     Buffer %:{" "} */}
-              {/*     {playback.current.element.duration && playback.current.element.duration > 0 */}
-              {/*       ? ( */}
-              {/*           (playback.current.element.bufferedTime / */}
-              {/*             playback.current.element.duration) * */}
-              {/*           100 */}
-              {/*         ).toFixed(2) */}
-              {/*       : 0} */}
-              {/*   </div> */}
-              {/*   <div> */}
-              {/*     Progress %:{" "} */}
-              {/*     {playback.current.element.duration && playback.current.element.duration > 0 */}
-              {/*       ? ( */}
-              {/*           (playback.current.element.currentTime / playback.current.element.duration) * */}
-              {/*           100 */}
-              {/*         ).toFixed(0) */}
-              {/*       : 0} */}
-              {/*   </div> */}
-              {/* </div> */}
+              <div className="fixed bottom-0 left-0 z-50 w-52 bg-black/30 p-4">
+                <div>
+                  Duration:{" "}
+                  {playback.current.element.duration
+                    ? playback.current.element.duration.toFixed(2)
+                    : 0}
+                </div>
+                <div>Current: {playback.current.element.currentTime.toFixed(2)}</div>
+                <div>Buffered: {playback.current.element.bufferedTime.toFixed(2)}</div>
+                <div>
+                  Buffer %:{" "}
+                  {playback.current.element.duration && playback.current.element.duration > 0
+                    ? (
+                      (playback.current.element.bufferedTime /
+                        playback.current.element.duration) *
+                      100
+                    ).toFixed(2)
+                    : 0}
+                </div>
+                <div>
+                  Progress %:{" "}
+                  {playback.current.element.duration && playback.current.element.duration > 0
+                    ? (
+                      (playback.current.element.currentTime / playback.current.element.duration) *
+                      100
+                    ).toFixed(0)
+                    : 0}
+                </div>
+              </div>
             </div>
 
             {/* Progress bar */}
             <div className="mt-4 h-5 w-full">
               <PlayerProgress />
-              {/* <div className="w-85 relative h-2 overflow-hidden rounded-md bg-gray-800">
-                <hr
-                  className="absolute h-full border-none bg-gray-600"
-                  style={{
-                    width: `${
-                      playback.current.element.duration && playback.current.element.duration > 0
-                        ? (playback.current.element.bufferedTime /
-                            playback.current.element.duration) *
-                          100
-                        : 0
-                    }%`,
-                  }}
-                />
-                <hr
-                  className="absolute h-full border-none bg-green-400"
-                  style={{
-                    width: `${
-                      playback.current.element.duration && playback.current.element.duration > 0
-                        ? (playback.current.element.currentTime /
-                            playback.current.element.duration) *
-                          100
-                        : 0
-                    }%`,
-                  }}
-                />
-              </div> */}
             </div>
           </div>
         </div>
@@ -458,9 +508,9 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
 
 // Milestones
 // ==========
-// 1. Play audio from component
+// 1. Play audio from component - DONE
 //    - Pass feed url to component
-// 2. Toggle playback
-// 3. Start playback from other component
-// 4. Seek
-// 5. Playback progress
+// 2. Toggle playback - DONE
+// 3. Start playback from other component - DONE
+// 4. Seek - IN PROGRESS
+// 5. Playback progress - DONE
