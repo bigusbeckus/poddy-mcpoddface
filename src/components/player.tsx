@@ -303,15 +303,23 @@ function PlayerProgress() {
   const currentTime = playback.current.element.currentTime;
 
   const [sliderTargetValue, setSliderTargetValue] = useState(currentTime);
+  const [autoUpdateSliderValue, setAutoUpdateSliderValue] = useState(true);
+
+  useEffect(() => {
+    console.log("currenttime effect:", currentTime);
+    if (autoUpdateSliderValue) {
+      setSliderTargetValue(currentTime);
+    }
+  }, [autoUpdateSliderValue, currentTime]);
 
   const durationString = duration
     ? formatHmsDuration(secondsToHms(duration), { omitIfZero: ["hours"], noZeroPadding: ["hours"] })
     : "0:00";
   const currentTimeString = duration
     ? formatHmsDuration(secondsToHms(currentTime), {
-      omitIfZero: ["hours"],
-      noZeroPadding: ["hours"],
-    })
+        omitIfZero: ["hours"],
+        noZeroPadding: ["hours"],
+      })
     : "0:00";
 
   const bufferSizePercent = useMemo(
@@ -325,13 +333,16 @@ function PlayerProgress() {
 
   function onSliderValueChanged(values: number[]) {
     const sliderValue = values[0];
+    console.log("slidervaluechange");
     setSliderTargetValue(sliderValue);
-    playback.current.controls.seek(sliderValue);
+    setAutoUpdateSliderValue(false);
   }
 
   function onSliderValueCommit(values: number[]) {
     const sliderValue = values[0];
-    console.log("Slider event:", "slidervaluecommit", sliderValue);
+    console.log("slidervaluecommit");
+    playback.current.controls.seek(sliderValue);
+    setAutoUpdateSliderValue(true);
   }
 
   return (
@@ -345,14 +356,15 @@ function PlayerProgress() {
         defaultValue={[0]}
         step={1}
         max={duration ? Math.floor(duration) : 0}
-        value={[
-          Math.min(
-            duration ? Math.floor(duration) : 0,
-            playback.current.element.playbackState === "seeking"
-              ? sliderTargetValue
-              : Math.floor(currentTime)
-          ),
-        ]}
+        // value={[
+        //   Math.min(
+        //     duration ? Math.floor(duration) : 0,
+        //     playback.current.element.playbackState === "seeking"
+        //       ? sliderTargetValue
+        //       : Math.floor(currentTime)
+        //   ),
+        // ]}
+        value={[sliderTargetValue]}
         onValueChange={onSliderValueChanged}
         onValueCommit={onSliderValueCommit}
       >
@@ -404,8 +416,9 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
 
   return (
     <div
-      className={`${!!playback.current.media || expand ? "" : "h-0"} ${className ?? ""
-        } bottom-0 z-50 overflow-hidden rounded-t-md bg-gray-900 p-2 outline outline-1 outline-white/10 transition-all`}
+      className={`${!!playback.current.media || expand ? "" : "h-0"} ${
+        className ?? ""
+      } bottom-0 z-50 overflow-hidden rounded-t-md bg-gray-900 p-2 outline outline-1 outline-white/10 transition-all`}
     >
       <audio ref={audioElementRef} autoPlay playsInline preload="none" />
       <div className="flex h-32">
@@ -477,19 +490,19 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
                   Buffer %:{" "}
                   {playback.current.element.duration && playback.current.element.duration > 0
                     ? (
-                      (playback.current.element.bufferedTime /
-                        playback.current.element.duration) *
-                      100
-                    ).toFixed(2)
+                        (playback.current.element.bufferedTime /
+                          playback.current.element.duration) *
+                        100
+                      ).toFixed(2)
                     : 0}
                 </div>
                 <div>
                   Progress %:{" "}
                   {playback.current.element.duration && playback.current.element.duration > 0
                     ? (
-                      (playback.current.element.currentTime / playback.current.element.duration) *
-                      100
-                    ).toFixed(0)
+                        (playback.current.element.currentTime / playback.current.element.duration) *
+                        100
+                      ).toFixed(0)
                     : 0}
                 </div>
               </div>
