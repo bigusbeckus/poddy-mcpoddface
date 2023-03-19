@@ -1,8 +1,10 @@
 import { atom, useAtom } from "jotai";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pause, Play, RotateCcw, RotateCw, SkipBack, SkipForward } from "react-feather";
 import { FetchedImage } from "@/components/image";
+import * as Slider from "@radix-ui/react-slider";
+import { formatHmsDuration, secondsToHms } from "@/libs/util/converters";
 
 type Media = {
   track: {
@@ -158,12 +160,26 @@ export function usePlayback() {
     return true;
   }
 
-  function seekForward() {
-    throw new Error("Not Implemented");
+  function skipForward(offset: number) {
+    if (audioElement) {
+      seek(audioElement.currentTime + offset);
+    }
   }
 
-  function seekBackward() {
-    throw new Error("Not Implemented");
+  function skipBackward(offset: number) {
+    if (audioElement) {
+      seek(audioElement.currentTime - offset);
+    }
+  }
+
+  function seek(timestamp: number) {
+    console.log("seekfn");
+    if (!(media && audioElement)) {
+      // No media to seek, do nothing
+      return false;
+    }
+    console.log(audioElement);
+    audioElement.currentTime = Math.min(audioElement.duration, Math.max(0, timestamp));
   }
 
   function clearSource() {
@@ -206,12 +222,75 @@ export function usePlayback() {
         play,
         pause,
         stop,
-        seekForward,
-        seekBackward,
+        seek,
+        skipForward,
+        skipBackward,
         setVolume,
       },
     },
   };
+}
+
+function PlayerProgress() {
+  const playback = usePlayback();
+  const duration = playback.current.element.duration;
+  const bufferedTime = playback.current.element.bufferedTime;
+  const currentTime = playback.current.element.currentTime;
+
+  const durationString = duration
+    ? formatHmsDuration(secondsToHms(duration), { omitZeroes: ["hours"] })
+    : "0:00";
+  const currentTimeString = duration
+    ? formatHmsDuration(secondsToHms(currentTime), { omitZeroes: ["hours"] })
+    : "0:00";
+  const bufferSizePercent = useMemo(
+    () => (duration && duration > 0 ? (bufferedTime / duration) * 100 : 0),
+    [duration, bufferedTime]
+  );
+
+  const playbackPercent = useMemo(
+    () => (duration && duration > 0 ? (currentTime / duration) * 100 : 0),
+    [duration, currentTime]
+  );
+
+  function onSliderValueChanged(values: number[]) {
+    const sliderValue = values[0];
+    // console.log(sliderValue);
+    playback.current.controls.seek(sliderValue);
+  }
+
+  function onSliderValueCommit(values: number[]) {
+    const sliderValue = values[0];
+    // console.log(sliderValue);
+  }
+
+  return (
+    <div className="flex w-full items-center">
+      <div className="h-full w-16 pr-2 text-xs text-gray-300">{currentTimeString}</div>
+      <Slider.Root
+        className="relative flex h-full grow touch-none select-none items-center"
+        aria-label="Playback progress"
+        defaultValue={[0]}
+        max={duration}
+        value={[currentTime]}
+        onValueChange={onSliderValueChanged}
+        onValueCommit={onSliderValueCommit}
+      >
+        <Slider.Track className="relative h-2 grow rounded-full bg-gray-800">
+          <Slider.Track
+            className="absolute h-full rounded-full bg-gray-600"
+            style={{ width: `${bufferSizePercent}%` }}
+          />
+          <Slider.Range
+            className="absolute h-full rounded-l-full bg-green-400"
+            // style={{ left: duration ? `${playbackPercent}%` : 0 }}
+          />
+        </Slider.Track>
+        <Slider.Thumb className="block h-4 w-4 rounded-full bg-white shadow-md shadow-black/70 hover:shadow-md hover:outline-none focus:outline-none active:outline-none" />
+      </Slider.Root>
+      <div className="h-full w-16 pl-2 text-right text-xs text-gray-300">{durationString}</div>
+    </div>
+  );
 }
 
 export const Player: React.FC<PlayerProps> = ({ className }) => {
@@ -309,40 +388,41 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
                 <SkipForward size={20} className="fill-white" />
               </button>
               {/* Debug info */}
-              <div className="fixed bottom-0 right-0 z-50 w-52 bg-black/30 p-4">
-                <div>
-                  Duration:{" "}
-                  {playback.current.element.duration
-                    ? playback.current.element.duration.toFixed(2)
-                    : 0}
-                </div>
-                <div>Current: {playback.current.element.currentTime.toFixed(2)}</div>
-                <div>Buffered: {playback.current.element.bufferedTime.toFixed(2)}</div>
-                <div>
-                  Buffer %:{" "}
-                  {playback.current.element.duration && playback.current.element.duration > 0
-                    ? (
-                        (playback.current.element.bufferedTime /
-                          playback.current.element.duration) *
-                        100
-                      ).toFixed(2)
-                    : 0}
-                </div>
-                <div>
-                  Progress %:{" "}
-                  {playback.current.element.duration && playback.current.element.duration > 0
-                    ? (
-                        (playback.current.element.currentTime / playback.current.element.duration) *
-                        100
-                      ).toFixed(0)
-                    : 0}
-                </div>
-              </div>
+              {/* <div className="fixed bottom-0 right-0 z-50 w-52 bg-black/30 p-4"> */}
+              {/*   <div> */}
+              {/*     Duration:{" "} */}
+              {/*     {playback.current.element.duration */}
+              {/*       ? playback.current.element.duration.toFixed(2) */}
+              {/*       : 0} */}
+              {/*   </div> */}
+              {/*   <div>Current: {playback.current.element.currentTime.toFixed(2)}</div> */}
+              {/*   <div>Buffered: {playback.current.element.bufferedTime.toFixed(2)}</div> */}
+              {/*   <div> */}
+              {/*     Buffer %:{" "} */}
+              {/*     {playback.current.element.duration && playback.current.element.duration > 0 */}
+              {/*       ? ( */}
+              {/*           (playback.current.element.bufferedTime / */}
+              {/*             playback.current.element.duration) * */}
+              {/*           100 */}
+              {/*         ).toFixed(2) */}
+              {/*       : 0} */}
+              {/*   </div> */}
+              {/*   <div> */}
+              {/*     Progress %:{" "} */}
+              {/*     {playback.current.element.duration && playback.current.element.duration > 0 */}
+              {/*       ? ( */}
+              {/*           (playback.current.element.currentTime / playback.current.element.duration) * */}
+              {/*           100 */}
+              {/*         ).toFixed(0) */}
+              {/*       : 0} */}
+              {/*   </div> */}
+              {/* </div> */}
             </div>
 
             {/* Progress bar */}
-            <div className="mt-4 w-full">
-              <div className="w-85 relative h-2 overflow-hidden rounded-md bg-gray-800">
+            <div className="mt-4 h-5 w-full">
+              <PlayerProgress />
+              {/* <div className="w-85 relative h-2 overflow-hidden rounded-md bg-gray-800">
                 <hr
                   className="absolute h-full border-none bg-gray-600"
                   style={{
@@ -367,7 +447,7 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
                     }%`,
                   }}
                 />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

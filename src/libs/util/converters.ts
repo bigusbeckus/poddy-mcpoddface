@@ -46,13 +46,42 @@ export function getDurationString(duration: number) {
   if (duration > 60) {
     minutes = Math.floor(duration / 60);
     duration -= minutes * 60;
-    durationString += `${hours > 0 ? ":" : ""}${minutes
-      .toString()
-      .padStart(2, "0")}`;
+    durationString += `${hours > 0 ? ":" : ""}${minutes.toString().padStart(2, "0")}`;
   }
   seconds = duration;
-  durationString += `${hours > 0 || minutes > 0 ? ":" : ""}${seconds
-    .toString()
-    .padStart(2, "0")}`;
+  durationString += `${hours > 0 || minutes > 0 ? ":" : ""}${seconds.toString().padStart(2, "0")}`;
   return durationString;
+}
+
+type DurationHms = {
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
+
+type FormatHmsDurationOptions = {
+  omitZeroes?: Array<keyof DurationHms>;
+};
+
+export function secondsToHms(duration: number) {
+  const hours = Math.floor(duration / 3600);
+  const minutes = Math.floor((duration % 3600) / 60);
+  const seconds = Math.floor((duration % 3600) % 60);
+
+  return {
+    hours,
+    minutes,
+    seconds,
+  } as DurationHms;
+}
+
+export function formatHmsDuration(duration: DurationHms, options?: FormatHmsDurationOptions) {
+  const values: string[] = [];
+  let key: keyof DurationHms;
+  for (key in duration) {
+    if (!options?.omitZeroes?.includes(key)) {
+      values.push(duration[key].toString().padStart(2, "0"));
+    }
+  }
+  return values.join(":");
 }
