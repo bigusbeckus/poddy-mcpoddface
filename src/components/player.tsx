@@ -304,6 +304,7 @@ function PlayerProgress() {
 
   const [sliderTargetValue, setSliderTargetValue] = useState(currentTime);
   const [autoUpdateSliderValue, setAutoUpdateSliderValue] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     console.log("currenttime effect:", currentTime);
@@ -321,6 +322,15 @@ function PlayerProgress() {
         noZeroPadding: ["hours"],
       })
     : "0:00";
+  const sliderTimeString =
+    sliderTargetValue === currentTime
+      ? currentTimeString
+      : duration
+      ? formatHmsDuration(secondsToHms(sliderTargetValue), {
+          omitIfZero: ["hours"],
+          noZeroPadding: ["hours"],
+        })
+      : "0:00";
 
   const bufferSizePercent = useMemo(
     () => (duration && duration > 0 ? (bufferedTime / duration) * 100 : 0),
@@ -330,12 +340,19 @@ function PlayerProgress() {
   //   () => (duration && duration > 0 ? (Math.floor(currentTime) / duration) * 100 : 0),
   //   [duration, currentTime]
   // );
+  // const sliderValuePercent = useMemo(
+  //   () => (duration && duration > 0 ? (Math.floor(sliderTargetValue) / duration) * 100 : 0),
+  //   [duration, sliderTargetValue]
+  // );
+  const sliderPopupLeft =
+    duration && duration > 0 ? (Math.floor(sliderTargetValue) / duration) * 100 : 0;
 
   function onSliderValueChanged(values: number[]) {
     const sliderValue = values[0];
     console.log("slidervaluechange");
     setSliderTargetValue(sliderValue);
     setAutoUpdateSliderValue(false);
+    setIsDragging(true);
   }
 
   function onSliderValueCommit(values: number[]) {
@@ -343,6 +360,7 @@ function PlayerProgress() {
     console.log("slidervaluecommit");
     playback.current.controls.seek(sliderValue);
     setAutoUpdateSliderValue(true);
+    setIsDragging(false);
   }
 
   return (
@@ -364,11 +382,19 @@ function PlayerProgress() {
         //       : Math.floor(currentTime)
         //   ),
         // ]}
-        value={[sliderTargetValue]}
+        value={[duration && duration > 0 ? Math.floor(sliderTargetValue) : 0]}
         onValueChange={onSliderValueChanged}
         onValueCommit={onSliderValueCommit}
       >
         <Slider.Track className="relative h-2 grow rounded-full bg-gray-800">
+          <div
+            className={`${
+              isDragging ? "" : "hidden"
+            } absolute bottom-0 z-10 mb-4 rounded-md bg-green-700/95 px-2 py-1`}
+            style={{ left: `calc(${sliderPopupLeft}%`, transform: `translateX(-50%)` }}
+          >
+            {sliderTimeString}
+          </div>
           <Slider.Track
             className="absolute h-full rounded-full bg-gray-600"
             style={{ width: `${bufferSizePercent}%` }}
