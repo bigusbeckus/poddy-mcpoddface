@@ -27,7 +27,3 @@ export const RootLayout: React.FC<RootLayoutProps> = ({ children, title, descrip
     </>
   );
 };
-
-export type NextPageWithRootLayout<P = Record<string, unknown>, IP = P> = NextPage<P, IP> & {
-  getLayout?: (page: ReactElement) => ReactNode;
-};

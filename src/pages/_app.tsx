@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { type NextPageWithRootLayout, RootLayout } from "@/layouts/root";
-import { useState } from "react";
+import { RootLayout } from "@/layouts/root";
+import { type ReactElement, type ReactNode, useState } from "react";
 import {
   type DehydratedState,
   Hydrate,
@@ -11,11 +11,16 @@ import {
 import { useSystemThemeChangeListener } from "@/hooks/theme";
 import { AnimatePresence, LazyMotion, domAnimation } from "framer-motion";
 import { Player } from "@/components/player";
+import { type NextPage } from "next";
+
+export type NextPageWithLayout<P = Record<string, unknown>, IP = P> = NextPage<P, IP> & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
 
 type AppPropsWithRootLayout = AppProps<{
   dehydratedState?: DehydratedState;
 }> & {
-  Component: NextPageWithRootLayout;
+  Component: NextPageWithLayout;
 };
 
 function MyApp({ Component, pageProps, router }: AppPropsWithRootLayout) {
@@ -39,13 +44,11 @@ function MyApp({ Component, pageProps, router }: AppPropsWithRootLayout) {
         <Hydrate state={pageProps.dehydratedState}>
           <div className="flex h-full flex-col pb-1">
             <div className="h-full flex-1 overflow-y-hidden">
-              {getLayout(
-                <LazyMotion features={domAnimation}>
-                  <AnimatePresence mode="wait" initial={false}>
-                    <Component {...pageProps} key={router.asPath} />
-                  </AnimatePresence>
-                </LazyMotion>
-              )}
+              <LazyMotion features={domAnimation}>
+                <AnimatePresence mode="wait" initial={false}>
+                  {getLayout(<Component {...pageProps} key={router.asPath} />)}
+                </AnimatePresence>
+              </LazyMotion>
             </div>
             <Player />
           </div>

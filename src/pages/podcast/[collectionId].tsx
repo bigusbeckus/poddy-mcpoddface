@@ -7,6 +7,8 @@ import { FetchedImage } from "@/components/image";
 import { type iTunesCategory } from "@prisma/client";
 import { EpisodeItem } from "@/components/episode-item";
 import Head from "next/head";
+import { DefaultLayout } from "@/layouts/default";
+import { type NextPageWithLayout } from "@/pages/_app";
 
 export const getServerSideProps: GetServerSideProps<{
   collectionId: number;
@@ -33,9 +35,9 @@ export const getServerSideProps: GetServerSideProps<{
   };
 };
 
-const SelectedPodcastPage = ({
-  collectionId,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+const SelectedPodcastPage: NextPageWithLayout<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ collectionId }) => {
   const queryClient = useQueryClient();
 
   function handleEpisodeOnClick(feedUrl: string) {
@@ -83,7 +85,7 @@ const SelectedPodcastPage = ({
   if (podcastIsLoading || feedIsLoading) {
     return (
       <AnimatedLayout>
-        <div className="h-full p-8">Loading...</div>;
+        <div className="h-full p-8">Loading...</div>
       </AnimatedLayout>
     );
   }
@@ -119,11 +121,11 @@ const SelectedPodcastPage = ({
   }
 
   return (
-    <AnimatedLayout>
+    <AnimatedLayout className="h-full overflow-y-scroll">
       <Head>
         <title>{feed.feedTitle} - Poddy McPodface</title>
       </Head>
-      <div className="flex h-full overflow-y-scroll">
+      <div className="flex">
         {/* <PodcastDetails podcast={data.results[0]} /> */}
 
         {/* Thumbnail and details */}
@@ -170,6 +172,10 @@ const SelectedPodcastPage = ({
       </div>
     </AnimatedLayout>
   );
+};
+
+SelectedPodcastPage.getLayout = function getLayout(page) {
+  return <DefaultLayout>{page}</DefaultLayout>;
 };
 
 export default SelectedPodcastPage;

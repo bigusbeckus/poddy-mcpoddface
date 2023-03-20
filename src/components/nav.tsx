@@ -1,12 +1,13 @@
 import Link from "next/link";
-
-type NavProps = {
-  children?: React.ReactNode;
-  className?: string;
-};
+import { FetchedImage } from "@/components/image";
 
 type NavBarDiscriminatorProps = {
   loggedIn?: boolean;
+};
+
+type LoggedInNavBarProps = {
+  username: string;
+  avatar?: string;
 };
 
 const DefaultNavBar = () => {
@@ -37,13 +38,48 @@ const DefaultNavBar = () => {
   );
 };
 
-const LoggedInNavBar = () => {
-  return <h1>Logged in</h1>;
+const LoggedInNavBar: React.FC<LoggedInNavBarProps> = ({ username }) => {
+  return (
+    <div className="flex h-full items-center justify-between">
+      <div className="flex flex-col justify-center">
+        <Link href="/">
+          <div className="cursor-pointer rounded-sm bg-gray-900 py-0 px-2 align-middle font-black text-primary_light-300 dark:bg-white/50 dark:text-gray-900">
+            Poddy McPodface
+          </div>
+        </Link>
+      </div>
+      <div className="flex h-full">
+        <div className="flex items-center pr-16">
+          {Array(8)
+            .fill(1)
+            .map((num, index) => (
+              <a key={index + num} className="pr-8">
+                Link #{index + num}
+              </a>
+            ))}
+        </div>
+        <div className="flex h-full overflow-hidden rounded-r-full bg-white/10">
+          <div className="pr-2 pl-2">
+            <h3 className="font-bold">{username}</h3>
+            <p className="text-end text-sm font-thin">Lawyer</p>
+          </div>
+          <div className="aspect-square h-full overflow-hidden rounded-full">
+            <FetchedImage
+              src="https://api.dicebear.com/5.x/avataaars-neutral/svg"
+              alt="dicebear-avatar"
+              imgClassName="w-full"
+              fill
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const NavBarDiscriminator: React.FC<NavBarDiscriminatorProps> = ({ loggedIn }) => {
   if (loggedIn) {
-    return <LoggedInNavBar />;
+    return <LoggedInNavBar username="Ron LaFlamme" />;
   }
 
   return <DefaultNavBar />;
