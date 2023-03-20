@@ -262,13 +262,13 @@ export function usePlayback() {
     throw new Error("Not Implemented");
   }
 
-  // Convert to getter if possible
-  function isMuted() {
-    if (!audioElement) {
-      return false;
+  const getBufferedTime = useCallback(() => {
+    const bufferLength = audioElement?.buffered.length;
+    if (bufferLength && bufferLength > 0) {
+      return audioElement.buffered.end(audioElement.buffered.length - 1);
     }
-    return audioElement.volume === 0;
-  }
+    return 0;
+  }, [audioElement?.buffered]);
 
   return {
     setTrack,
@@ -277,12 +277,11 @@ export function usePlayback() {
       media: useAtom(mediaAtom)[0],
       element: {
         playbackState: useAtom(playbackStateAtom)[0],
-        currentTime: currentTimeState,
-        bufferedTime,
+        currentTime: audioElement?.currentTime || 0,
+        bufferedTime: getBufferedTime(),
         duration: audioElement?.duration,
       },
-      isMuted: useState(isMuted())[0],
-      // isPlaying: useState(isPlaying())[0],
+      isMuted: !!(audioElement?.volume === 0),
       controls: {
         play,
         pause,
@@ -369,19 +368,11 @@ function PlayerProgress() {
         {currentTimeString}
       </div>
       <Slider.Root
-        className="relative flex h-full grow touch-none select-none items-center"
+        className="relative flex h-full grow cursor-pointer touch-none select-none items-center"
         aria-label="Playback progress"
         defaultValue={[0]}
         step={1}
-        max={duration ? Math.floor(duration) : 0}
-        // value={[
-        //   Math.min(
-        //     duration ? Math.floor(duration) : 0,
-        //     playback.current.element.playbackState === "seeking"
-        //       ? sliderTargetValue
-        //       : Math.floor(currentTime)
-        //   ),
-        // ]}
+        max={duration ? Math.floor(duration) : 1}
         value={[duration && duration > 0 ? Math.floor(sliderTargetValue) : 0]}
         onValueChange={onSliderValueChanged}
         onValueCommit={onSliderValueCommit}
