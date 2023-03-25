@@ -162,6 +162,7 @@ const SelectedPodcastPage: NextPageWithLayout<
                 podcast={{
                   title: feed.feedTitle,
                   url: `/podcast/${collectionId}`,
+                  artworkUrl: podcast.results[0].artworkUrl600,
                   collectionId,
                 }}
                 onClick={() => handleEpisodeOnClick(episode.url)}

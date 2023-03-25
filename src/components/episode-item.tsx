@@ -15,6 +15,7 @@ type EpisodeItemProps = {
     title: string;
     url: string;
     collectionId: number;
+    artworkUrl: string;
   };
   onClick: () => void;
 };
@@ -63,9 +64,8 @@ export const EpisodeItem: React.FC<EpisodeItemProps> = (props) => {
 
   return (
     <div
-      className={`cursor-pointer overflow-hidden rounded-lg transition-colors hover:bg-black/20 hover:dark:bg-gray-800 ${
-        isCurrentTrack ? "dark:bg-gray-800" : ""
-      }`}
+      className={`cursor-pointer overflow-hidden rounded-lg transition-colors hover:bg-black/20 hover:dark:bg-gray-800 ${isCurrentTrack ? "dark:bg-gray-800" : ""
+        }`}
       onClick={handleOnClick}
       onMouseEnter={() => handleHover(true)}
       onMouseLeave={() => handleHover(false)}
@@ -73,9 +73,8 @@ export const EpisodeItem: React.FC<EpisodeItemProps> = (props) => {
       <div className="flex p-2">
         <div className="relative h-32 w-32 shrink-0 grow-0 overflow-hidden rounded-md outline outline-1 outline-white/10">
           <div
-            className={`absolute z-10 h-full w-full cursor-default bg-white/20 ${
-              isHovered || isCurrentTrack ? "" : "opacity-0"
-            }`}
+            className={`absolute z-10 h-full w-full cursor-default bg-white/20 ${isHovered || isCurrentTrack ? "" : "opacity-0"
+              }`}
             onMouseEnter={() => handleThumbHover(true)}
             onMouseLeave={() => handleThumbHover(false)}
           >
@@ -85,9 +84,8 @@ export const EpisodeItem: React.FC<EpisodeItemProps> = (props) => {
               onClick={handleThumbClick}
             >
               <div
-                className={`flex items-center justify-center rounded-full p-4 shadow-black/70 outline outline-1 outline-white/10 backdrop-blur-sm transition-all ${
-                  isThumbHovered ? "bg-black/50" : "bg-black/40"
-                }`}
+                className={`flex items-center justify-center rounded-full p-4 shadow-black/70 outline outline-1 outline-white/10 backdrop-blur-sm transition-all ${isThumbHovered ? "bg-black/50" : "bg-black/40"
+                  }`}
               >
                 {isCurrentlyPlaying ? (
                   <Pause size={20} className="fill-white stroke-none" />
@@ -99,6 +97,7 @@ export const EpisodeItem: React.FC<EpisodeItemProps> = (props) => {
           </div>
           <FetchedImage
             src={props.artworkUrl}
+            fallback={props.podcast.artworkUrl}
             alt={`${props.title} thumbnail`}
             imgClassName="w-full"
             fill
