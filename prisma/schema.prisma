@@ -90,7 +90,7 @@ model Episode {
   Podcast           Podcast     @relation(fields: [podcastId], references: [id])
   podcastId         String      @db.Uuid
 
-  @@unique([title, url, length])
+  @@unique([podcastId, title, url, length])
 }
 
 enum EpisodeType {

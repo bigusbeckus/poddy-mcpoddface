@@ -5,7 +5,7 @@ import { prisma } from "@/server/db/client";
 import { ITUNES_PODCAST_LOOKUP_LINK } from "@/libs/itunes-podcast";
 import { XMLParser } from "fast-xml-parser";
 import { iTunesType, type Prisma } from "@prisma/client";
-import { differenceInHours, differenceInMilliseconds, parse } from "date-fns";
+import { differenceInMilliseconds, parse } from "date-fns";
 import { EPISODE_FETCH_LIMIT } from "@/server/constants/limits";
 import { EPISODE_DEFAULT_ORDER_BY } from "@/server/constants/order";
 import { parseDurationSeconds } from "@/libs/util/converters";
@@ -48,24 +48,26 @@ function getCategories(root: any, maxLevels = 5) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getChannelItem(item: any) {
+function getChannelItem(item: any, itunesCollectionId: string) {
   const durationIsNum = /^\d+$/.test(item["itunes:duration"]);
 
   if (!itemValid(item)) {
     return undefined;
   }
 
+  const guidString =
+    item["guid"] && item["guid"]["#text"]
+      ? `${itunesCollectionId}-${item["guid"]["#text"].toString()}`
+      : `${itunesCollectionId}-${item["enclosure"]["@_url"]}-${item["title"]}}-${
+          item["pubDate"] ?? ""
+        }`;
+
   const episode: Omit<Prisma.EpisodeCreateInput, "Podcast"> = {
     title: item["title"].toString(),
     url: item["enclosure"]["@_url"],
     length: parseInt(item["enclosure"]["@_length"]),
     type: item["enclosure"]["@_type"],
-    guid:
-      item["guid"] && item["guid"]["#text"]
-        ? item["guid"]["#text"].toString()
-        : createHash("sha256")
-            .update(`${item["enclosure"]["@_url"]}-${item["title"]}}-${item["pubDate"] ?? ""}`)
-            .digest("base64"),
+    guid: createHash("sha256").update(guidString).digest("base64"),
     pubDate: item["pubDate"]
       ? parse(
           (() => {
@@ -87,6 +89,15 @@ function getChannelItem(item: any) {
     itunesSeason: item["itunes:season"],
     itunesEpisodeType: item["itunes:episodetype"],
   };
+
+  console.log(
+    "duration:",
+    item["itunes:duration"],
+    "length:",
+    item["enclosure"]["@_length"],
+    "parsed:",
+    episode.itunesDuration
+  );
 
   return episode;
 }
@@ -117,15 +128,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     // Respond if entry is found and is not stale
-    if (dbResponse && differenceInHours(new Date(), dbResponse.createdAt) < 24) {
-      const endTime = new Date();
-      console.log(
-        `Fetch ${dbResponse.feedTitle} completed in:`,
-        differenceInMilliseconds(endTime, startTime),
-        "ms"
-      );
-      return res.status(200).send(dbResponse);
-    }
+    // if (dbResponse && differenceInHours(new Date(), dbResponse.createdAt) < 24) {
+    //   const endTime = new Date();
+    //   console.log(
+    //     `Fetch ${dbResponse.feedTitle} completed in:`,
+    //     differenceInMilliseconds(endTime, startTime),
+    //     "ms"
+    //   );
+    //   return res.status(200).send(dbResponse);
+    // }
 
     // Lookup podcast if db entry hasn't been found or is stale
     const lookupResponse = (await axios.get(`${ITUNES_PODCAST_LOOKUP_LINK}&id=${id}`)).data;
@@ -202,13 +213,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (channel.item) {
       if (isIterable(channel.item)) {
         for (const item of channel.item) {
-          const episode = getChannelItem(item);
+          const episode = getChannelItem(item, id as string);
           if (episode) {
             episodeData.push(episode);
           }
         }
       } else {
-        const episode = getChannelItem(channel.item);
+        const episode = getChannelItem(channel.item, id as string);
         if (episode) {
           episodeData.push(episode);
         }
@@ -247,17 +258,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               ({
                 create: episode,
                 update: episode as Prisma.EpisodeUpdateInput,
-                where: episode.guid
-                  ? {
-                      guid: episode.guid,
-                    }
-                  : {
-                      title_url_length: {
-                        title: episode.title,
-                        url: episode.url,
-                        length: episode.length,
-                      },
-                    },
+                where: { guid: episode.guid },
               } as Prisma.EpisodeUpsertWithWhereUniqueWithoutPodcastInput)
           ),
         },
