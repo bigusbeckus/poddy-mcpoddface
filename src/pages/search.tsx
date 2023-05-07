@@ -44,7 +44,7 @@ const SearchPage: NextPageWithLayout<InferGetServerSidePropsType<typeof getServe
 
   const queryResult = useQuery({
     queryKey: ["podcasts", "search", searchTerms],
-    queryFn: () => podcastSearchLink().term(searchTerms).fetch(),
+    queryFn: () => podcastSearchLink().term(searchTerms).limit(64).fetch(),
     placeholderData: () => {
       return queryClient.getQueryData<SearchReturn>(["podcasts"]);
     },
@@ -66,18 +66,17 @@ const SearchPage: NextPageWithLayout<InferGetServerSidePropsType<typeof getServe
   }
 
   return (
-    // <AnimatedLayout containerType="div" className="flex h-full flex-col overflow-y-hidden">
     <>
-      <div className="flex justify-center p-2">
-        <form onSubmit={handleSubmit}>
-          <TextField
-            value={input}
-            onChange={handleSearchTermsChange}
-            placeholder="Search"
-            className="w-96 text-xl"
-          />
-        </form>
-      </div>
+      {/* <div className="flex justify-center p-2"> */}
+      {/*   <form onSubmit={handleSubmit}> */}
+      {/*     <TextField */}
+      {/*       value={input} */}
+      {/*       onChange={handleSearchTermsChange} */}
+      {/*       placeholder="Search" */}
+      {/*       className="w-96 text-xl" */}
+      {/*     /> */}
+      {/*   </form> */}
+      {/* </div> */}
       <div className="flex flex-1 overflow-y-hidden">
         <div className="p-4">
           <div className="w-96 rounded-md bg-gray-900 p-8">
@@ -93,14 +92,13 @@ const SearchPage: NextPageWithLayout<InferGetServerSidePropsType<typeof getServe
             </div>
           </div>
         </div>
-        <div className="flex h-full flex-grow-0">
+        <div className="flex h-full grow">
           <AnimatePresence mode="wait" initial={false}>
             <SearchPageComponentDiscriminator q={searchTerms} queryResult={queryResult} />
           </AnimatePresence>
         </div>
       </div>
     </>
-    // </AnimatedLayout>
   );
 };
 
@@ -136,7 +134,7 @@ function SearchPageComponentDiscriminator({
 // Loading state
 function SearchPageLoading() {
   return (
-    <AnimatedLayout containerType="div">
+    <AnimatedLayout containerType="div" className="w-full h-full">
       <div>Loading search results...</div>
     </AnimatedLayout>
   );
@@ -154,24 +152,16 @@ function SearchPageError({ error, q }: { error: unknown; q: string }) {
 // Search results display component
 function SearchResults({ data, q }: { data: SearchReturn; q: string }) {
   return (
-    <AnimatedLayout containerType="div" className="h-full overflow-y-scroll p-8">
+    <AnimatedLayout containerType="div" className="h-full w-full overflow-y-scroll p-8">
       <Head>
         <title>{data.resultCount} result(s) - Search - Poddy McPodface</title>
       </Head>
-      <h1 className="text-3xl font-light">
-        {data.resultCount.toString()} result(s) found for &quot;{q}&quot;
+      <h1 className="text-2xl font-light">
+        {data.resultCount.toString()} result(s) found for
+        <span className="ml-2 font-bold">{q}</span>
       </h1>
       <hr className="my-8 border-white/10" />
-      {/* <ul> */}
-      {/*   {data.results.map((podcast) => ( */}
-      {/*     <li key={podcast.collectionId}> */}
-      {/*       <Link href={`podcast/${podcast.collectionId}`}> */}
-      {/*         <a className="hover:underline">{podcast.collectionName}</a> */}
-      {/*       </Link> */}
-      {/*     </li> */}
-      {/*   ))} */}
-      {/* </ul> */}
-      <div className="grid grid-cols-10 gap-1 pb-4">
+      <div className="grid grid-cols-8 gap-2 pb-4">
         {data.results.map((podcast) => (
           <PodcastThumb
             key={podcast.collectionId}

@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { type FC, type ReactNode, useState, useRef } from "react";
+import { type FC, type ReactNode, useState, useRef, useEffect } from "react";
 import { ProgressCircular } from "@/components/progress/progress-circular";
 
 type ImageProps = {
@@ -25,6 +25,10 @@ export const FetchedImage: FC<ImageProps> = ({
   const imgElementRef = useRef(null as HTMLImageElement | null);
 
   const [imageSrc, setImageSrc] = useState(src);
+
+  useEffect(() => {
+    setImageSrc(src);
+  }, [src]);
 
   function handleImgLoad() {
     setLoading(false);

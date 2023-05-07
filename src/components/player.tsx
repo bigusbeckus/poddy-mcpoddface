@@ -5,6 +5,7 @@ import { Pause, Play, RotateCcw, RotateCw, SkipBack, SkipForward } from "react-f
 import { FetchedImage } from "@/components/image";
 import * as Slider from "@radix-ui/react-slider";
 import { formatHmsDuration, secondsToHms } from "@/libs/util/converters";
+import { useLocalSettings } from "@/hooks/use-local-settings";
 
 type Media = {
   track: {
@@ -16,6 +17,7 @@ type Media = {
   podcast: {
     title: string;
     url: string;
+    artworkUrl: string;
     collectionId: number;
   };
 };
@@ -364,9 +366,7 @@ function PlayerProgress() {
 
   return (
     <div className="flex w-full items-center">
-      <div className="h-full w-16 overflow-y-scroll pr-2 text-xs text-gray-300">
-        {currentTimeString}
-      </div>
+      <div className="h-full w-16 pr-2 text-xs text-gray-300">{currentTimeString}</div>
       <Slider.Root
         className="relative flex h-full grow cursor-pointer touch-none select-none items-center"
         aria-label="Playback progress"
@@ -377,7 +377,7 @@ function PlayerProgress() {
         onValueChange={onSliderValueChanged}
         onValueCommit={onSliderValueCommit}
       >
-        <Slider.Track className="relative h-2 grow rounded-full bg-gray-800">
+        <Slider.Track className="relative flex h-4 grow items-center">
           <div
             className={`${
               isDragging ? "" : "hidden"
@@ -386,11 +386,12 @@ function PlayerProgress() {
           >
             {sliderTimeString}
           </div>
+          <Slider.Track className="absolute h-1 w-full rounded-full bg-gray-800" />
           <Slider.Track
-            className="absolute h-full rounded-full bg-gray-600"
+            className="absolute h-1 rounded-full bg-gray-600"
             style={{ width: `${bufferSizePercent}%` }}
           />
-          <Slider.Range className="absolute h-full rounded-l-full bg-green-400" />
+          <Slider.Range className="absolute h-1 rounded-l-full bg-green-400" />
         </Slider.Track>
         <Slider.Thumb className="block h-4 w-4 rounded-full bg-white shadow-md shadow-black/70 hover:shadow-md hover:outline-none focus:outline-none active:outline-none" />
       </Slider.Root>
@@ -404,6 +405,7 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
   const [expand, setExpand] = useState(true);
   const setAudioElement = useAtom(audioElementAtom)[1];
   const playback = usePlayback();
+  const [settings, setPlayerStats] = useLocalSettings();
 
   useEffect(() => {
     setAudioElement(audioElementRef.current);
@@ -433,22 +435,23 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
 
   return (
     <div
-      className={`${!!playback.current.media || expand ? "" : "h-0"} ${
-        className ?? ""
-      } bottom-0 z-50 overflow-hidden rounded-t-md bg-gray-900 p-2 outline outline-1 outline-white/10 transition-all`}
+      className={`bottom-0 z-50 overflow-hidden bg-gray-900 transition-all duration-1000 ${
+        !!playback.current.media ? "p-2 outline outline-1 outline-white/10" : "h-0"
+      } ${className ?? ""}`}
     >
       <audio ref={audioElementRef} autoPlay playsInline preload="none" />
       <div className="flex h-32">
-        <div className="h-full w-32 overflow-hidden rounded-md bg-gray-900 outline outline-1 outline-white/10">
+        <div className="h-full w-32 overflow-hidden bg-gray-900 outline outline-1 outline-white/10">
           {playback.current.media ? (
             <FetchedImage
               src={playback.current.media.track.artworkUrl ?? ""}
+              fallback={playback.current.media.podcast.artworkUrl}
               alt={`${playback.current.media?.track.title ?? ""} thumbnail`}
               imgClassName="w-full"
               fill
             />
           ) : (
-            <div className="h-full w-32 rounded-md bg-white/10"></div>
+            <div className="h-full w-32 bg-white/10"></div>
           )}
         </div>
 
@@ -494,35 +497,38 @@ export const Player: React.FC<PlayerProps> = ({ className }) => {
                 <SkipForward size={20} className="fill-white" />
               </button>
               {/* Debug info */}
-              <div className="fixed bottom-0 left-0 z-50 w-52 bg-black/30 p-4">
-                <div>
-                  Duration:{" "}
-                  {playback.current.element.duration
-                    ? playback.current.element.duration.toFixed(2)
-                    : 0}
+              {settings.enablePlayerStats && (
+                <div className="fixed bottom-0 left-0 z-50 w-52 bg-black/30 p-4">
+                  <div>
+                    Duration:{" "}
+                    {playback.current.element.duration
+                      ? playback.current.element.duration.toFixed(2)
+                      : 0}
+                  </div>
+                  <div>Current: {playback.current.element.currentTime.toFixed(2)}</div>
+                  <div>Buffered: {playback.current.element.bufferedTime.toFixed(2)}</div>
+                  <div>
+                    Buffer %:{" "}
+                    {playback.current.element.duration && playback.current.element.duration > 0
+                      ? (
+                          (playback.current.element.bufferedTime /
+                            playback.current.element.duration) *
+                          100
+                        ).toFixed(2)
+                      : 0}
+                  </div>
+                  <div>
+                    Progress %:{" "}
+                    {playback.current.element.duration && playback.current.element.duration > 0
+                      ? (
+                          (playback.current.element.currentTime /
+                            playback.current.element.duration) *
+                          100
+                        ).toFixed(0)
+                      : 0}
+                  </div>
                 </div>
-                <div>Current: {playback.current.element.currentTime.toFixed(2)}</div>
-                <div>Buffered: {playback.current.element.bufferedTime.toFixed(2)}</div>
-                <div>
-                  Buffer %:{" "}
-                  {playback.current.element.duration && playback.current.element.duration > 0
-                    ? (
-                        (playback.current.element.bufferedTime /
-                          playback.current.element.duration) *
-                        100
-                      ).toFixed(2)
-                    : 0}
-                </div>
-                <div>
-                  Progress %:{" "}
-                  {playback.current.element.duration && playback.current.element.duration > 0
-                    ? (
-                        (playback.current.element.currentTime / playback.current.element.duration) *
-                        100
-                      ).toFixed(0)
-                    : 0}
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Progress bar */}

@@ -10,7 +10,7 @@ type DefaultLayoutProps = {
 export const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   return (
     <AnimatedLayout containerType="div" className="flex h-full flex-col overflow-hidden">
-      <NavBar />
+      <NavBar showSearchBar />
       <AnimatePresence mode="wait" initial={false}>
         {children}
       </AnimatePresence>

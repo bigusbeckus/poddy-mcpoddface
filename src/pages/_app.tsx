@@ -42,7 +42,7 @@ function MyApp({ Component, pageProps, router }: AppPropsWithRootLayout) {
     <RootLayout>
       <QueryClientProvider client={queryClient}>
         <Hydrate state={pageProps.dehydratedState}>
-          <div className="flex h-full flex-col pb-1">
+          <div className="flex h-full flex-col">
             <div className="h-full flex-1 overflow-y-hidden">
               <LazyMotion features={domAnimation}>
                 <AnimatePresence mode="wait" initial={false}>

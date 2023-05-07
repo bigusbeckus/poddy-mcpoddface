@@ -125,49 +125,57 @@ const SelectedPodcastPage: NextPageWithLayout<
       <Head>
         <title>{feed.feedTitle} - Poddy McPodface</title>
       </Head>
-      <div className="flex">
-        {/* <PodcastDetails podcast={data.results[0]} /> */}
+      <div className="flex justify-center">
+        <div className="flex w-3/4">
+          {/* <PodcastDetails podcast={data.results[0]} /> */}
 
-        {/* Thumbnail and details */}
-        <div className="flex-align-start sticky top-24 w-96 shrink p-8">
-          <FetchedImage
-            src={feed.itunesArtworkUrl600}
-            alt={`${feed.feedTitle} thumbnail`}
-            imgClassName="rounded-md"
-          />
-          <h1 className="py-4 text-center text-3xl">{feed.feedTitle}</h1>
-          <div className="flex flex-wrap justify-center gap-2 py-2">
-            {feed.feedItunesCategories?.map((category: iTunesCategory) => (
-              <span
-                key={category.id}
-                className="rounded-xl bg-black/20 py-1 px-2 text-sm font-bold dark:bg-white/20"
-              >
-                {category.text}
-              </span>
-            ))}
+          {/* Thumbnail and details */}
+          <div className="flex-align-start sticky top-2 w-96 shrink p-8">
+            <FetchedImage
+              src={feed.itunesArtworkUrl600}
+              alt={`${feed.feedTitle} thumbnail`}
+              // imgClassName="rounded-md"
+              // wrapperClassName="shadow shadow-black/30 shadow-lg"
+            />
+            <h1 className="py-6 text-center text-2xl">{feed.feedTitle}</h1>
+            <p className="break-words border-y border-y-gray-300 px-2 py-4 text-sm text-gray-500 dark:border-y-gray-800">
+              {feed.feedDescription}
+            </p>
+            <div className="flex flex-wrap items-center gap-2 py-6 px-1 text-xs">
+              {/* <span className="pr-2">Tags:</span> */}
+              {feed.feedItunesCategories?.map((category: iTunesCategory) => (
+                <span
+                  key={category.id}
+                  className="rounded-xl py-1 px-2 text-gray-700 outline outline-1 outline-gray-500 dark:text-gray-400 dark:outline-gray-700"
+                >
+                  {category.text}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-        {/* Episodes */}
-        <div className="flex-1 overflow-y-scroll px-8">
-          <div className="grid w-full grow grid-cols-1 gap-3 py-8">
-            {/* <h1 className="text-2xl font-bold">Episodes</h1> */}
-            {feed.episodes.map((episode) => (
-              <EpisodeItem
-                key={episode.id}
-                title={episode.title}
-                description={episode.description ?? undefined}
-                url={episode.url}
-                artworkUrl={episode.itunesImage ?? feed.itunesArtworkUrl100}
-                duration={episode.itunesDuration ?? undefined}
-                podcast={{
-                  title: feed.feedTitle,
-                  url: `/podcast/${collectionId}`,
-                  artworkUrl: podcast.results[0].artworkUrl600,
-                  collectionId,
-                }}
-                onClick={() => handleEpisodeOnClick(episode.url)}
-              />
-            ))}
+          {/* Episodes */}
+          <div className="flex-1 px-8">
+            <div className="grid w-full grow grid-cols-1 divide-y divide-gray-800 py-8">
+              {/* <h1 className="text-2xl font-bold">Episodes</h1> */}
+              {feed.episodes.map((episode) => (
+                <EpisodeItem
+                  key={episode.id}
+                  title={episode.title}
+                  description={episode.description ?? undefined}
+                  url={episode.url}
+                  artworkUrl={episode.itunesImage ?? feed.itunesArtworkUrl100}
+                  duration={episode.itunesDuration ?? undefined}
+                  releaseDate={episode.pubDate}
+                  podcast={{
+                    title: feed.feedTitle,
+                    url: `/podcast/${collectionId}`,
+                    artworkUrl: podcast.results[0].artworkUrl600,
+                    collectionId,
+                  }}
+                  onClick={() => handleEpisodeOnClick(episode.url)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>

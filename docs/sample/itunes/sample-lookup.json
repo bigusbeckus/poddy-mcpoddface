@@ -1,0 +1,41 @@
+{
+  "resultCount": 1,
+  "results": [
+    {
+      "wrapperType": "track",
+      "kind": "podcast",
+      "artistId": 875258601,
+      "collectionId": 840986946,
+      "trackId": 840986946,
+      "artistName": "No Such Thing As A Fish",
+      "collectionName": "No Such Thing As A Fish",
+      "trackName": "No Such Thing As A Fish",
+      "collectionCensoredName": "No Such Thing As A Fish",
+      "trackCensoredName": "No Such Thing As A Fish",
+      "artistViewUrl": "https://podcasts.apple.com/us/artist/qi-elves/875258601?uo=4",
+      "collectionViewUrl": "https://podcasts.apple.com/us/podcast/no-such-thing-as-a-fish/id840986946?uo=4",
+      "feedUrl": "https://audioboom.com/channels/2399216.rss",
+      "trackViewUrl": "https://podcasts.apple.com/us/podcast/no-such-thing-as-a-fish/id840986946?uo=4",
+      "artworkUrl30": "https://is3-ssl.mzstatic.com/image/thumb/Podcasts115/v4/69/fe/83/69fe8332-d1f5-3e5c-d480-d585191da9f3/mza_3992131713395201470.jpg/30x30bb.jpg",
+      "artworkUrl60": "https://is3-ssl.mzstatic.com/image/thumb/Podcasts115/v4/69/fe/83/69fe8332-d1f5-3e5c-d480-d585191da9f3/mza_3992131713395201470.jpg/60x60bb.jpg",
+      "artworkUrl100": "https://is3-ssl.mzstatic.com/image/thumb/Podcasts115/v4/69/fe/83/69fe8332-d1f5-3e5c-d480-d585191da9f3/mza_3992131713395201470.jpg/100x100bb.jpg",
+      "collectionPrice": 0.0,
+      "trackPrice": 0.0,
+      "trackRentalPrice": 0,
+      "collectionHdPrice": 0,
+      "trackHdPrice": 0,
+      "trackHdRentalPrice": 0,
+      "releaseDate": "2022-10-13T23:01:00Z",
+      "collectionExplicitness": "cleaned",
+      "trackExplicitness": "cleaned",
+      "trackCount": 478,
+      "country": "USA",
+      "currency": "USD",
+      "primaryGenreName": "Comedy",
+      "contentAdvisoryRating": "Clean",
+      "artworkUrl600": "https://is3-ssl.mzstatic.com/image/thumb/Podcasts115/v4/69/fe/83/69fe8332-d1f5-3e5c-d480-d585191da9f3/mza_3992131713395201470.jpg/600x600bb.jpg",
+      "genreIds": ["1303", "26"],
+      "genres": ["Comedy", "Podcasts"]
+    }
+  ]
+}

@@ -1,6 +1,4 @@
 import Head from "next/head";
-import type { NextPage } from "next/types";
-import type { ReactElement, ReactNode } from "react";
 import { RouterProgres } from "@/components/router-progress";
 
 type RootLayoutProps = {

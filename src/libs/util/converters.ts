@@ -33,26 +33,6 @@ export function parseDurationSeconds(duration: string) {
   }
 }
 
-export function getDurationString(duration: number) {
-  let durationString = "",
-    hours = 0,
-    minutes = 0,
-    seconds = 0;
-  if (duration > 3600) {
-    hours = Math.floor(duration / 3600);
-    duration -= hours * 3600;
-    durationString += `${hours}`;
-  }
-  if (duration > 60) {
-    minutes = Math.floor(duration / 60);
-    duration -= minutes * 60;
-    durationString += `${hours > 0 ? ":" : ""}${minutes.toString().padStart(2, "0")}`;
-  }
-  seconds = duration;
-  durationString += `${hours > 0 || minutes > 0 ? ":" : ""}${seconds.toString().padStart(2, "0")}`;
-  return durationString;
-}
-
 type DurationHms = {
   hours: number;
   minutes: number;
@@ -62,6 +42,7 @@ type DurationHms = {
 type FormatHmsDurationOptions = {
   omitIfZero?: Array<keyof DurationHms>;
   noZeroPadding?: Array<keyof DurationHms>;
+  style?: "text" | "numeric";
 };
 
 export function secondsToHms(duration: number) {
@@ -92,5 +73,15 @@ export function formatHmsDuration(duration: DurationHms, options?: FormatHmsDura
         : duration[key].toString().padStart(2, "0")
     );
   }
-  return values.join(":");
+
+  if (options?.style === "text") {
+    const suffixes = ["s", "m", "h"];
+    return values
+      .reverse()
+      .map((value, index) => `${value}${suffixes[index]}`)
+      .reverse()
+      .join(" ");
+  } else {
+    return values.join(":");
+  }
 }

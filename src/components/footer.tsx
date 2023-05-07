@@ -32,11 +32,11 @@ export const DefaultFooter: React.FC = () => {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="absolute bottom-10 max-h-96 w-full rounded-md bg-black/20 py-1 text-sm ring-1 ring-black ring-opacity-30 backdrop-blur-md focus:outline-none dark:bg-white/20 dark:ring-white dark:ring-opacity-30">
+              <Listbox.Options className="absolute bottom-10 max-h-96 w-full bg-black/20 text-sm ring-1 ring-black ring-opacity-30 backdrop-blur-md focus:outline-none dark:bg-white/20 dark:ring-white dark:ring-opacity-30">
                 {themes.map((theme) => (
                   <Listbox.Option
                     className={({ selected }) =>
-                      `cursor-pointer select-none rounded-md px-3 py-2 transition-colors ${
+                      `cursor-pointer select-none px-3 py-2 transition-colors ${
                         selected
                           ? "bg-black/20 dark:bg-white/20"
                           : "hover:bg-black/10 hover:dark:bg-white/10"
@@ -50,7 +50,7 @@ export const DefaultFooter: React.FC = () => {
                 ))}
               </Listbox.Options>
             </Transition>
-            <Listbox.Button className="relative w-full rounded-md bg-black/20 px-3 py-2 text-black backdrop-blur-md dark:bg-white/20 dark:text-white">
+            <Listbox.Button className="relative w-full bg-black/20 px-3 py-2 text-black backdrop-blur-md dark:bg-white/20 dark:text-white">
               <div className="flex items-center gap-3">
                 <div>
                   <Monitor

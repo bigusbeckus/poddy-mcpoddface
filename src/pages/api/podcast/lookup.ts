@@ -5,7 +5,7 @@ import { prisma } from "@/server/db/client";
 import { ITUNES_PODCAST_LOOKUP_LINK } from "@/libs/itunes-podcast";
 import { XMLParser } from "fast-xml-parser";
 import { iTunesType, type Prisma } from "@prisma/client";
-import { differenceInMilliseconds, parse } from "date-fns";
+import { differenceInMilliseconds, parse, differenceInHours } from "date-fns";
 import { EPISODE_FETCH_LIMIT } from "@/server/constants/limits";
 import { EPISODE_DEFAULT_ORDER_BY } from "@/server/constants/order";
 import { parseDurationSeconds } from "@/libs/util/converters";
@@ -128,15 +128,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     // Respond if entry is found and is not stale
-    // if (dbResponse && differenceInHours(new Date(), dbResponse.createdAt) < 24) {
-    //   const endTime = new Date();
-    //   console.log(
-    //     `Fetch ${dbResponse.feedTitle} completed in:`,
-    //     differenceInMilliseconds(endTime, startTime),
-    //     "ms"
-    //   );
-    //   return res.status(200).send(dbResponse);
-    // }
+    if (dbResponse && differenceInHours(new Date(), dbResponse.createdAt) < 24) {
+      const endTime = new Date();
+      console.log(
+        `Fetch ${dbResponse.feedTitle} completed in:`,
+        differenceInMilliseconds(endTime, startTime),
+        "ms"
+      );
+      return res.status(200).send(dbResponse);
+    }
 
     // Lookup podcast if db entry hasn't been found or is stale
     const lookupResponse = (await axios.get(`${ITUNES_PODCAST_LOOKUP_LINK}&id=${id}`)).data;

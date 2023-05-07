@@ -1,16 +1,25 @@
 import Link from "next/link";
 import { FetchedImage } from "@/components/image";
+import { SearchBar } from "./search-bar";
+
+type CommonProps = {
+  showSearchBar?: boolean;
+};
+
+type NavBarProps = CommonProps;
 
 type NavBarDiscriminatorProps = {
   loggedIn?: boolean;
-};
+} & Required<CommonProps>;
 
 type LoggedInNavBarProps = {
   username: string;
   avatar?: string;
-};
+} & Required<CommonProps>;
 
-const DefaultNavBar = () => {
+type DefaultNavBarProps = Required<CommonProps>;
+
+const DefaultNavBar: React.FC<DefaultNavBarProps> = ({ showSearchBar }) => {
   return (
     <div className="flex justify-between">
       <div className="flex flex-col justify-center">
@@ -20,6 +29,7 @@ const DefaultNavBar = () => {
           </div>
         </Link>
       </div>
+      {showSearchBar && <SearchBar />}
       <div className="flex flex-col justify-center">
         <div className="flex items-center justify-end gap-8">
           <Link href="/login">
@@ -77,20 +87,20 @@ const LoggedInNavBar: React.FC<LoggedInNavBarProps> = ({ username }) => {
   );
 };
 
-const NavBarDiscriminator: React.FC<NavBarDiscriminatorProps> = ({ loggedIn }) => {
+const NavBarDiscriminator: React.FC<NavBarDiscriminatorProps> = ({ loggedIn, showSearchBar }) => {
   if (loggedIn) {
-    return <LoggedInNavBar username="Ron LaFlamme" />;
+    return <LoggedInNavBar username="Ron LaFlamme" showSearchBar={showSearchBar} />;
   }
 
-  return <DefaultNavBar />;
+  return <DefaultNavBar showSearchBar={showSearchBar} />;
 };
 
-export function NavBar() {
+export const NavBar: React.FC<NavBarProps> = ({ showSearchBar }) => {
   return (
     <header className="py-6 px-8">
       <nav className={`flex h-12 w-full flex-col justify-center align-middle`}>
-        <NavBarDiscriminator />
+        <NavBarDiscriminator showSearchBar={!!showSearchBar} />
       </nav>
     </header>
   );
-}
+};
