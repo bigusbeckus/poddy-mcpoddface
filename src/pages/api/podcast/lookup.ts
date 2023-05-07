@@ -5,11 +5,12 @@ import { prisma } from "@/server/db/client";
 import { ITUNES_PODCAST_LOOKUP_LINK } from "@/libs/itunes-podcast";
 import { XMLParser } from "fast-xml-parser";
 import { iTunesType, type Prisma } from "@prisma/client";
-import { differenceInHours, differenceInMilliseconds, parse } from "date-fns";
+import { differenceInMilliseconds, parse, differenceInHours } from "date-fns";
 import { EPISODE_FETCH_LIMIT } from "@/server/constants/limits";
 import { EPISODE_DEFAULT_ORDER_BY } from "@/server/constants/order";
 import { parseDurationSeconds } from "@/libs/util/converters";
 import { createHash } from "crypto";
+import { isIterable } from "@/libs/util/general";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function itemValid(item: any) {
@@ -44,6 +45,61 @@ function getCategories(root: any, maxLevels = 5) {
   }
 
   return categories;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getChannelItem(item: any, itunesCollectionId: string) {
+  const durationIsNum = /^\d+$/.test(item["itunes:duration"]);
+
+  if (!itemValid(item)) {
+    return undefined;
+  }
+
+  const guidString =
+    item["guid"] && item["guid"]["#text"]
+      ? `${itunesCollectionId}-${item["guid"]["#text"].toString()}`
+      : `${itunesCollectionId}-${item["enclosure"]["@_url"]}-${item["title"]}}-${
+          item["pubDate"] ?? ""
+        }`;
+
+  const episode: Omit<Prisma.EpisodeCreateInput, "Podcast"> = {
+    title: item["title"].toString(),
+    url: item["enclosure"]["@_url"],
+    length: parseInt(item["enclosure"]["@_length"]),
+    type: item["enclosure"]["@_type"],
+    guid: createHash("sha256").update(guidString).digest("base64"),
+    pubDate: item["pubDate"]
+      ? parse(
+          (() => {
+            const fragments = item["pubDate"].split(" ");
+            return `${fragments.slice(0, fragments.length - 1).join(" ")} +0000`;
+          })(),
+          "E, dd MMM yyyy HH:mm:ss xx",
+          new Date()
+        )
+      : undefined,
+    description: item["description"]?.toString(),
+    itunesDuration: durationIsNum
+      ? parseInt(item["itunes:duration"])
+      : parseDurationSeconds(item["itunes:duration"]),
+    link: item["link"]?.toString(),
+    itunesImage: item["itunes:image"] ? item["itunes:image"]["@_href"] : undefined,
+    itunesExplicit: item["itunes:explicit"] === "yes",
+    itunesEpisode: item["itunes:episode"],
+    itunesSeason: item["itunes:season"],
+    itunesEpisodeType: item["itunes:episodetype"],
+  };
+
+  console.log(
+    "duration:",
+    item["itunes:duration"],
+    "length:",
+    item["enclosure"]["@_length"],
+    "parsed:",
+    episode.itunesDuration
+  );
+
+  return episode;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -154,47 +210,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     };
 
     const episodeData: Omit<Prisma.EpisodeCreateInput, "Podcast">[] = [];
-    for (const item of channel.item) {
-      const durationIsNum = /^\d+$/.test(item["itunes:duration"]);
-
-      if (!itemValid(item)) {
-        continue;
+    if (channel.item) {
+      if (isIterable(channel.item)) {
+        for (const item of channel.item) {
+          const episode = getChannelItem(item, id as string);
+          if (episode) {
+            episodeData.push(episode);
+          }
+        }
+      } else {
+        const episode = getChannelItem(channel.item, id as string);
+        if (episode) {
+          episodeData.push(episode);
+        }
       }
-
-      const episode: Omit<Prisma.EpisodeCreateInput, "Podcast"> = {
-        title: item["title"].toString(),
-        url: item["enclosure"]["@_url"],
-        length: parseInt(item["enclosure"]["@_length"]),
-        type: item["enclosure"]["@_type"],
-        guid:
-          item["guid"] && item["guid"]["#text"]
-            ? item["guid"]["#text"].toString()
-            : createHash("sha256")
-                .update(`${item["enclosure"]["@_url"]}-${item["title"]}}-${item["pubDate"] ?? ""}`)
-                .digest("base64"),
-        pubDate: item["pubDate"]
-          ? parse(
-              (() => {
-                const fragments = item["pubDate"].split(" ");
-                return `${fragments.slice(0, fragments.length - 1).join(" ")} +0000`;
-              })(),
-              "E, dd MMM yyyy HH:mm:ss xx",
-              new Date()
-            )
-          : undefined,
-        description: item["description"]?.toString(),
-        itunesDuration: durationIsNum
-          ? parseInt(item["itunes:duration"])
-          : parseDurationSeconds(item["itunes:duration"]),
-        link: item["link"]?.toString(),
-        itunesImage: item["itunes:image"] ? item["itunes:image"]["@_href"] : undefined,
-        itunesExplicit: item["itunes:explicit"] === "yes",
-        itunesEpisode: item["itunes:episode"],
-        itunesSeason: item["itunes:season"],
-        itunesEpisodeType: item["itunes:episodetype"],
-      };
-
-      episodeData.push(episode);
     }
 
     const feedCategories = [...new Set<string>(getCategories(channel["itunes:category"]))].map(
@@ -229,17 +258,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               ({
                 create: episode,
                 update: episode as Prisma.EpisodeUpdateInput,
-                where: episode.guid
-                  ? {
-                      guid: episode.guid,
-                    }
-                  : {
-                      title_url_length: {
-                        title: episode.title,
-                        url: episode.url,
-                        length: episode.length,
-                      },
-                    },
+                where: { guid: episode.guid },
               } as Prisma.EpisodeUpsertWithWhereUniqueWithoutPodcastInput)
           ),
         },

@@ -1,7 +1,7 @@
 import { createLogger, type LoggerOptions, format, transports } from "winston";
 import { env } from "@/env.mjs";
 
-const logDir = env.LOG_DIR;
+const logDir = env.LOG_DIR ?? "logs";
 const logLevel = env.NODE_ENV === "development" ? "debug" : "info";
 const defaultFormat = format.combine(
   format.timestamp(),

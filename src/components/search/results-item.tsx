@@ -10,8 +10,8 @@ type SearchResultItemProps = {
 export const SearchResultItem: React.FC<SearchResultItemProps> = ({ result, className }) => {
   return (
     <div className={className}>
-      <div className="flex h-16 cursor-pointer overflow-hidden rounded-md p-1 transition hover:bg-background_light/20 hover:dark:bg-background_dark/20">
-        <div className="aspect-square h-full overflow-hidden rounded">
+      <div className="flex h-16 cursor-pointer overflow-hidden p-1 transition hover:bg-background_light/20 hover:dark:bg-background_dark/20">
+        <div className="aspect-square h-full overflow-hidden">
           <FetchedImage
             src={result.artworkUrl600}
             alt={`${result.collectionName} artwork`}

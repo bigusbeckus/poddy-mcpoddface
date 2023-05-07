@@ -9,6 +9,8 @@ import { type GetServerSideProps, type InferGetServerSidePropsType } from "next"
 import Head from "next/head";
 // import Link from "next/link";
 import { type FormEvent, useState, type ChangeEvent } from "react";
+import { DefaultLayout } from "@/layouts/default";
+import { type NextPageWithLayout } from "@/pages/_app";
 
 export const getServerSideProps: GetServerSideProps<{
   q: string;
@@ -32,7 +34,9 @@ export const getServerSideProps: GetServerSideProps<{
 };
 
 // Search page root
-function SearchPage({ q }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+const SearchPage: NextPageWithLayout<InferGetServerSidePropsType<typeof getServerSideProps>> = ({
+  q,
+}) => {
   const queryClient = useQueryClient();
 
   const [input, setInput] = useState(q);
@@ -40,7 +44,7 @@ function SearchPage({ q }: InferGetServerSidePropsType<typeof getServerSideProps
 
   const queryResult = useQuery({
     queryKey: ["podcasts", "search", searchTerms],
-    queryFn: () => podcastSearchLink().term(searchTerms).fetch(),
+    queryFn: () => podcastSearchLink().term(searchTerms).limit(64).fetch(),
     placeholderData: () => {
       return queryClient.getQueryData<SearchReturn>(["podcasts"]);
     },
@@ -62,43 +66,41 @@ function SearchPage({ q }: InferGetServerSidePropsType<typeof getServerSideProps
   }
 
   return (
-    <AnimatedLayout containerType="div" className="block h-full">
-      <div className="flex h-full flex-col">
-        <div className="flex justify-center p-2">
-          <form onSubmit={handleSubmit}>
-            <TextField
-              value={input}
-              onChange={handleSearchTermsChange}
-              placeholder="Search"
-              className="w-96 text-xl"
-            />
-          </form>
-        </div>
-        <div className="flex flex-1">
-          <div className="w-96 p-4">
-            <div className="rounded-md bg-gray-900 p-8">
-              <h3 className="text-2xl font-extrabold text-emerald-500">Filter</h3>
-              {/* <hr className="my-4 border-b-0 border-gray-800" /> */}
-              <div className="py-2"></div>
-              <div>
-                <ul>
-                  <li>Option 1</li>
-                  <li>Option 2</li>
-                  <li>Option 3</li>
-                </ul>
-              </div>
+    <>
+      {/* <div className="flex justify-center p-2"> */}
+      {/*   <form onSubmit={handleSubmit}> */}
+      {/*     <TextField */}
+      {/*       value={input} */}
+      {/*       onChange={handleSearchTermsChange} */}
+      {/*       placeholder="Search" */}
+      {/*       className="w-96 text-xl" */}
+      {/*     /> */}
+      {/*   </form> */}
+      {/* </div> */}
+      <div className="flex flex-1 overflow-y-hidden">
+        <div className="p-4">
+          <div className="w-96 rounded-md bg-gray-900 p-8">
+            <h3 className="text-2xl font-extrabold text-emerald-500">Filter</h3>
+            {/* <hr className="my-4 border-b-0 border-gray-800" /> */}
+            <div className="py-2"></div>
+            <div>
+              <ul>
+                <li>Option 1</li>
+                <li>Option 2</li>
+                <li>Option 3</li>
+              </ul>
             </div>
           </div>
-          <div className="flex h-full flex-1">
-            <AnimatePresence mode="wait" initial={false}>
-              <SearchPageComponentDiscriminator q={searchTerms} queryResult={queryResult} />
-            </AnimatePresence>
-          </div>
+        </div>
+        <div className="flex h-full grow">
+          <AnimatePresence mode="wait" initial={false}>
+            <SearchPageComponentDiscriminator q={searchTerms} queryResult={queryResult} />
+          </AnimatePresence>
         </div>
       </div>
-    </AnimatedLayout>
+    </>
   );
-}
+};
 
 // Loading/error handler and component selector
 function SearchPageComponentDiscriminator({
@@ -132,7 +134,7 @@ function SearchPageComponentDiscriminator({
 // Loading state
 function SearchPageLoading() {
   return (
-    <AnimatedLayout>
+    <AnimatedLayout containerType="div" className="w-full h-full">
       <div>Loading search results...</div>
     </AnimatedLayout>
   );
@@ -141,7 +143,7 @@ function SearchPageLoading() {
 // Error component
 function SearchPageError({ error, q }: { error: unknown; q: string }) {
   return (
-    <AnimatedLayout>
+    <AnimatedLayout containerType="div">
       <div> {error instanceof Error ? error.message : `Search for podcast: "${q}" failed`}</div>
     </AnimatedLayout>
   );
@@ -150,36 +152,24 @@ function SearchPageError({ error, q }: { error: unknown; q: string }) {
 // Search results display component
 function SearchResults({ data, q }: { data: SearchReturn; q: string }) {
   return (
-    <AnimatedLayout>
+    <AnimatedLayout containerType="div" className="h-full w-full overflow-y-scroll p-8">
       <Head>
         <title>{data.resultCount} result(s) - Search - Poddy McPodface</title>
       </Head>
-      <div className="h-full overflow-y-scroll p-8">
-        <div>
-          <h1 className="text-3xl font-light">
-            {data.resultCount.toString()} result(s) found for &quot;{q}&quot;
-          </h1>
-          <hr className="my-8 border-white/10" />
-          {/* <ul> */}
-          {/*   {data.results.map((podcast) => ( */}
-          {/*     <li key={podcast.collectionId}> */}
-          {/*       <Link href={`podcast/${podcast.collectionId}`}> */}
-          {/*         <a className="hover:underline">{podcast.collectionName}</a> */}
-          {/*       </Link> */}
-          {/*     </li> */}
-          {/*   ))} */}
-          {/* </ul> */}
-          <div className="grid grid-cols-10 gap-1 pb-4">
-            {data.results.map((podcast) => (
-              <PodcastThumb
-                key={podcast.collectionId}
-                id={podcast.collectionId}
-                artworkUrl={podcast.artworkUrl600}
-                name={podcast.collectionName}
-              />
-            ))}
-          </div>
-        </div>
+      <h1 className="text-2xl font-light">
+        {data.resultCount.toString()} result(s) found for
+        <span className="ml-2 font-bold">{q}</span>
+      </h1>
+      <hr className="my-8 border-white/10" />
+      <div className="grid grid-cols-8 gap-2 pb-4">
+        {data.results.map((podcast) => (
+          <PodcastThumb
+            key={podcast.collectionId}
+            id={podcast.collectionId}
+            artworkUrl={podcast.artworkUrl600}
+            name={podcast.collectionName}
+          />
+        ))}
       </div>
     </AnimatedLayout>
   );
@@ -198,5 +188,9 @@ function NoSearchResults() {
     </AnimatedLayout>
   );
 }
+
+SearchPage.getLayout = function getLayout(page) {
+  return <DefaultLayout>{page}</DefaultLayout>;
+};
 
 export default SearchPage;

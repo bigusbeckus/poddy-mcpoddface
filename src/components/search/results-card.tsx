@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { atom, useAtom } from "jotai";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { type ChangeEvent, type FocusEvent, type FormEvent, useState } from "react";
@@ -19,8 +18,6 @@ type SearchResultsCardProps = {
 
 const SEARCH_ITEMS_LIMIT = 8;
 
-export const searchAtom = atom("");
-
 export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
   className,
   onSearchCardShow,
@@ -28,7 +25,7 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
 }) => {
   const router = useRouter();
 
-  const [terms, setTerms] = useAtom(searchAtom);
+  const [terms, setTerms] = useState("");
   const { recentSearches, addToRecentSearches, clearRecentSearches } = useRecentSearches();
 
   const searchLink = podcastSearchLink().term(terms).limit(SEARCH_ITEMS_LIMIT);
@@ -102,12 +99,12 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
           placeholder="Search"
           value={terms}
           onChange={handleInputChange}
-          className={`border-r-1 w-96 rounded-l-lg border-2 border-solid border-transparent border-r-black/30  bg-black/20 px-3 py-2 text-lg placeholder-black/70 outline-none backdrop-blur-sm transition duration-150 focus:border-y-black/30 focus:border-x-black/30 dark:border-r-white/5 dark:bg-white/10 dark:placeholder-white/50 dark:focus:border-y-white/10 dark:focus:border-x-white/10`}
+          className={`border-r-1 w-96 border-2 border-solid border-transparent border-r-black/30  bg-black/20 px-3 py-2 text-lg placeholder-black/70 outline-none backdrop-blur-sm transition duration-150 focus:border-x-black/30 focus:border-y-black/30 dark:border-r-white/5 dark:bg-white/10 dark:placeholder-white/50 dark:focus:border-x-white/10 dark:focus:border-y-white/10`}
           onFocus={handleSearchFieldFocus}
           onBlur={handleSearchFieldFocus}
         />
         <button
-          className={`flex flex-col justify-center rounded-r-lg border-2 border-l-0 border-solid border-transparent bg-black/20 pl-2 pr-3 backdrop-blur-sm transition-colors hover:bg-black/30 dark:bg-white/10 dark:hover:bg-white/20 dark:active:bg-white/30 ${
+          className={`flex flex-col justify-center border-2 border-l-0 border-solid border-transparent bg-black/20 pl-2 pr-3 backdrop-blur-sm transition-colors hover:bg-black/30 dark:bg-white/10 dark:hover:bg-white/20 dark:active:bg-white/30 ${
             isSearchInputFocused
               ? "border-y-black/30 border-r-black/30 dark:border-y-white/10 dark:border-r-white/10"
               : ""
@@ -124,15 +121,17 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
       </form>
       <div className="items-top mt-1 flex w-full justify-center">
         <div
-          className={`fixed origin-top overflow-hidden rounded-md backdrop-blur-md ${
+          className={`fixed origin-top overflow-hidden backdrop-blur-md ${
             showSearchCard() ? "" : "opacity-0"
           } transition-opacity`}
         >
-          <div className="border-1 max-h-96 overflow-y-scroll rounded-md border-solid border-black/40 bg-black/20 px-2 py-2 dark:border-white/40 dark:bg-white/20">
+          <div className="border-1 max-h-96 overflow-y-scroll border-solid border-black/40 bg-black/20 px-2 py-2 dark:border-white/40 dark:bg-white/20">
             <div className="w-[26rem]">
               {showSearchCard() &&
                 (isInitialLoading ? (
-                  <ProgressCircular className="h-8 stroke-green-400" />
+                  <div className="flex items-center justify-center">
+                    <ProgressCircular className="h-8 stroke-green-400" />
+                  </div>
                 ) : terms.length > 0 ? (
                   data && data.resultCount > 0 ? (
                     data.results.map((result) => (
@@ -172,7 +171,7 @@ export const SearchResultsCard: React.FC<SearchResultsCardProps> = ({
                       </Link>
                       // <div key={item.searchTerm}>{item.searchTerm}</div>
                     ))}
-                    <div className="flex justify-end pt-2 pb-1">
+                    <div className="flex justify-end pb-1 pt-2">
                       <button
                         className="text-xs font-bold text-green-700 hover:text-green-900 dark:text-green-400 dark:hover:text-green-500"
                         onClick={() => clearRecentSearches()}

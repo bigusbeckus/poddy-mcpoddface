@@ -1,6 +1,4 @@
 import Head from "next/head";
-import type { NextPage } from "next/types";
-import type { ReactElement, ReactNode } from "react";
 import { RouterProgres } from "@/components/router-progress";
 
 type RootLayoutProps = {
@@ -26,8 +24,4 @@ export const RootLayout: React.FC<RootLayoutProps> = ({ children, title, descrip
       </div>
     </>
   );
-};
-
-export type NextPageWithRootLayout<P = Record<string, unknown>, IP = P> = NextPage<P, IP> & {
-  getLayout?: (page: ReactElement) => ReactNode;
 };
